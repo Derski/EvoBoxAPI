@@ -8,7 +8,9 @@
       "version": "1.0.1"
     }
   },
-
+  "buildOptions": {
+    "copyToOutput": [ "private_key.pem" ]
+  },
   "frameworks": {
     "netcoreapp1.0": {
       "imports": "dnxcore50"

@@ -21,16 +21,47 @@ namespace BoxConsole
     {
         public static void Main(string[] args)
         {
+            
+            
+        }
+
+        private static void TestTimeHack()
+        {
+            var isOK = NtpLibrary.SystemTimeHack.CheckAndTryToFixSystemTime();
+        }
+
+        private static void TestFileCreate()
+        {
             Task<BoxFile> task = BoxService.ExecuteMainAsyncFileUpload();
             var awaiter = task.GetAwaiter();
-            
-            awaiter.OnCompleted(()=> OnFileCreatedComplete(awaiter.GetResult()));
+
+            awaiter.OnCompleted(() => OnFileCreatedComplete(awaiter.GetResult()));
 
             //timer
-            for(int i = 0; i<100;i++)
+            for (int i = 0; i < 100; i++)
             {
                 Thread.Sleep(5000);
             }
+        }
+
+        private static void TestJWT()
+        {
+            try
+            {
+                Task t = BoxService.JWTAuthAsync();
+                t.Wait();
+
+                Console.WriteLine();
+                Console.Write("Press return to exit...");
+                Console.ReadLine();
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+
+
         }
 
         private static void OnFileCreatedComplete(BoxFile f)
