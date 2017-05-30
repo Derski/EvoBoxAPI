@@ -10,25 +10,38 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
+
+// this is a useful link:  https://github.com/box/box-windows-sdk-v2/tree/master/Box.V2/Managers
+
 namespace EvoBoxAPI
 {
     public static class BoxService
-    { 
-
-        public static async Task<BoxCollection<BoxItem>> FindFolderByName(string folderName)
+    {
+        private static BoxClient GetAdminClient()
         {
+            var jsonPath = Path.Combine(AppContext.BaseDirectory, @"EvoBoxAPI\BoxConfig.json");
+            Stream jsonFileStream = new FileStream(jsonPath, FileMode.Open);
+            IBoxConfig boxConfig = Box.V2.Config.BoxConfig.CreateFromJsonFile(jsonFileStream);
+            BoxJWTAuth boxJWT;
+            boxJWT = new BoxJWTAuth(boxConfig);
+            string adminToken = boxJWT.AdminToken();
+            BoxClient adminClient = boxJWT.AdminClient(adminToken);
+            return adminClient;
+        }
+        public static async Task<BoxCollection<BoxItem>> FindFoldersById(string folderId)
+        {
+            // Phoenix folder id =  "to_Search:28291368952"
+            List<string> ancestorIds = new List<string>();
+            ancestorIds.Add("tosearch");
+            //folderId = "to_search:28291368952";
+            //folderId = "to_Search = 28291368952";
+            ancestorIds.Add(folderId);
             try
             {
-                var jsonPath = Path.Combine(AppContext.BaseDirectory, @"EvoBoxAPI\BoxConfig.json");
-                Stream jsonFileStream = new FileStream(jsonPath, FileMode.Open);
-                IBoxConfig boxConfig = Box.V2.Config.BoxConfig.CreateFromJsonFile(jsonFileStream);
-                BoxJWTAuth boxJWT;
-                boxJWT = new BoxJWTAuth(boxConfig);
-                string adminToken = boxJWT.AdminToken();
-                BoxClient adminClient = boxJWT.AdminClient(adminToken);
+                BoxClient adminClient = GetAdminClient();
                 var searchManager = adminClient.SearchManager;
                 //var searchResults =  await searchManager.SearchAsync("name");
-                var searchResults = await searchManager.SearchAsync("a");
+                var searchResults = await searchManager.SearchAsync(ancestorFolderIds: ancestorIds);
                 return searchResults;
 
             }
@@ -43,22 +56,17 @@ namespace EvoBoxAPI
         {
             try
             {
-                var jsonPath = Path.Combine(AppContext.BaseDirectory, @"EvoBoxAPI\BoxConfig.json");
-                Stream jsonFileStream = new FileStream(jsonPath, FileMode.Open);
-                IBoxConfig boxConfig = Box.V2.Config.BoxConfig.CreateFromJsonFile(jsonFileStream);
-                BoxJWTAuth boxJWT;
-                boxJWT = new BoxJWTAuth(boxConfig);
-                string adminToken = boxJWT.AdminToken();
-                BoxClient adminClient = boxJWT.AdminClient(adminToken);
-                var folderManager = adminClient.FoldersManager;
+                BoxClient client = GetAdminClient();
+                var folderManager = client.FoldersManager;
                 BoxFolderRequest r = new BoxFolderRequest();
-                var parentFolderId = "0";//this should be root folder
-                r.Description = "Test Description2";
-                r.Name = "Test Name2";
+                r.Description = FolderName;
+                r.Name = FolderName;
                 r.Type = BoxType.folder;
+                //need a better way to figure out the parent...
                 BoxRequestEntity e = new BoxRequestEntity();
                 e.Id = 0.ToString();
                 r.Parent = e;
+                
 
                 var f = await  folderManager.CreateAsync(r);
                 return f;

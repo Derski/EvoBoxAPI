@@ -24,7 +24,7 @@ namespace BoxConsole
             var isOK = NtpLibrary.SystemTimeHack.CheckAndTryToFixSystemTime();
             if (isOK)
             {
-                Task<BoxCollection<BoxItem>> task = BoxService.FindFolderByName("");
+                Task<BoxCollection<BoxItem>> task = BoxService.FindFoldersById("28291368952");
                 var awaiter = task.GetAwaiter();
 
                 awaiter.OnCompleted(() => OnFindFolderComplete(awaiter.GetResult()));
