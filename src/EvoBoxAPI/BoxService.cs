@@ -3,6 +3,7 @@ using Box.V2.Auth;
 using Box.V2.Config;
 using Box.V2.JWTAuth;
 using Box.V2.Models;
+using Box.V2.Models.Request;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -41,6 +42,29 @@ namespace EvoBoxAPI
                 BoxClient adminClient = GetAdminClient();
                 var searchManager = adminClient.SearchManager;
                 //var searchResults =  await searchManager.SearchAsync("name");
+
+                //test mdi filters
+                var filter = new
+                {
+                    someKey = "blah",
+                    expiresOn = new
+                    {
+                        gt = new DateTime(2015, 1, 1),
+                        lt = new DateTime(2015, 9, 1)
+                    },
+                    count = new { gt = 5, lt = 10 },
+                    option = "value1"
+                };
+
+                var mdFilter = new BoxMetadataFilterRequest()
+                {
+                    TemplateKey = "yourTemplate",
+                    Scope = "enterprise",
+                    Filters = filter
+                };
+                //end test
+
+
                 var searchResults = await searchManager.SearchAsync(ancestorFolderIds: ancestorIds);
                 return searchResults;
 
