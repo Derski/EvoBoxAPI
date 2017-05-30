@@ -21,8 +21,38 @@ namespace BoxConsole
     {
         public static void Main(string[] args)
         {
-            
-            
+            var isOK = NtpLibrary.SystemTimeHack.CheckAndTryToFixSystemTime();
+            if (isOK)
+            {
+                Task<BoxCollection<BoxItem>> task = BoxService.FindFolderByName("");
+                var awaiter = task.GetAwaiter();
+
+                awaiter.OnCompleted(() => OnFindFolderComplete(awaiter.GetResult()));
+
+                //timer
+                for (int i = 0; i < 100; i++)
+                {
+                    Thread.Sleep(5000);
+                }
+            }
+        }
+
+        private static void TestFolderCreate()
+        {
+            var isOK = NtpLibrary.SystemTimeHack.CheckAndTryToFixSystemTime();
+            if (isOK)
+            {
+                Task<BoxFolder> task = BoxService.CreateFolder("", "");
+                var awaiter = task.GetAwaiter();
+
+                awaiter.OnCompleted(() => OnFolderCreatedComplete(awaiter.GetResult()));
+
+                //timer
+                for (int i = 0; i < 100; i++)
+                {
+                    Thread.Sleep(5000);
+                }
+            }
         }
 
         private static void TestTimeHack()
@@ -48,12 +78,16 @@ namespace BoxConsole
         {
             try
             {
-                Task t = BoxService.JWTAuthAsync();
-                t.Wait();
+                if(NtpLibrary.SystemTimeHack.CheckAndTryToFixSystemTime())
+                {
+                    Task t = BoxService.JWTAuthAsync();
+                    t.Wait();
 
-                Console.WriteLine();
-                Console.Write("Press return to exit...");
-                Console.ReadLine();
+                    Console.WriteLine();
+                    Console.Write("Press return to exit...");
+                    Console.ReadLine();
+                }
+
             }
             catch (Exception)
             {
@@ -65,6 +99,14 @@ namespace BoxConsole
         }
 
         private static void OnFileCreatedComplete(BoxFile f)
+        {
+
+        }
+        private static void OnFolderCreatedComplete(BoxFolder f)
+        {
+
+        }
+        private static void OnFindFolderComplete(BoxCollection<BoxItem> f)
         {
 
         }

@@ -9,7 +9,7 @@
     }
   },
   "buildOptions": {
-    "copyToOutput": [ "private_key.pem" ]
+    "copyToOutput": [ "private_key.pem", "BoxConfig.json" ]
   },
   "frameworks": {
     "netcoreapp1.0": {

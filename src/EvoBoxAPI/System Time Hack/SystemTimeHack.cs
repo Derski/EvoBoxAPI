@@ -9,7 +9,7 @@ namespace NtpLibrary
     {
         public static bool CheckAndTryToFixSystemTime()
         {
-            bool isOk = false;
+            bool isOk = true;
             try
             {
                 NetworkTime nt = new NetworkTime();
@@ -24,6 +24,7 @@ namespace NtpLibrary
             }
             catch (Exception ex)
             {
+                isOk = false;
                 throw ex;
             }
             

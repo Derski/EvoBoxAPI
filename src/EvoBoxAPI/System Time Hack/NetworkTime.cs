@@ -34,12 +34,6 @@ namespace NtpLibrary
         public static string[] srvs = {
         "time.nist.gov",
         "pool.ntp.org",
-        "europe.pool.ntp.org",
-        "asia.pool.ntp.org",
-        "oceania.pool.ntp.org",
-        "north-america.pool.ntp.org",
-        "south-america.pool.ntp.org",
-        "africa.pool.ntp.org",
         "ntp1.inrim.it",
         "ntp2.inrim.it"
     };

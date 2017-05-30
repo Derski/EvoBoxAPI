@@ -2,7 +2,7 @@
   "version": "1.0.0-*",
   "buildOptions": {
     "emitEntryPoint": true,
-    "copyToOutput": [ "../EvoBoxAPI/private_key.pem" ]
+    "copyToOutput": [ "../EvoBoxAPI/private_key.pem", "../EvoBoxAPI/BoxConfig.json" ]
   },
 
   "dependencies": {
