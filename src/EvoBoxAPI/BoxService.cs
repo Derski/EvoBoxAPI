@@ -29,49 +29,18 @@ namespace EvoBoxAPI
             BoxClient adminClient = boxJWT.AdminClient(adminToken);
             return adminClient;
         }
-        public static async Task<BoxCollection<BoxItem>> FindFoldersById(string folderId)
+        public static async Task<BoxCollection<BoxItem>> FindFoldersByClient(string Client)
         {
-            // Phoenix folder id =  "to_Search:28291368952"
-            List<string> ancestorIds = new List<string>();
-            ancestorIds.Add("tosearch");
-            //folderId = "to_search:28291368952";
-            //folderId = "to_Search = 28291368952";
-            ancestorIds.Add(folderId);
             try
             {
                 BoxClient adminClient = GetAdminClient();
                 var searchManager = adminClient.SearchManager;
-                //var searchResults =  await searchManager.SearchAsync("name");
-
-                //test mdi filters
-                var filter = new
-                {
-                    someKey = "blah",
-                    expiresOn = new
-                    {
-                        gt = new DateTime(2015, 1, 1),
-                        lt = new DateTime(2015, 9, 1)
-                    },
-                    count = new { gt = 5, lt = 10 },
-                    option = "value1"
-                };
-
-                var mdFilter = new BoxMetadataFilterRequest()
-                {
-                    TemplateKey = "yourTemplate",
-                    Scope = "enterprise",
-                    Filters = filter
-                };
-                //end test
-
-
-                var searchResults = await searchManager.SearchAsync(ancestorFolderIds: ancestorIds);
+                var searchResults = await searchManager.SearchAsync(Client);
                 return searchResults;
 
             }
             catch (Exception ex)
             {
-
                 throw ex;
             }
         }

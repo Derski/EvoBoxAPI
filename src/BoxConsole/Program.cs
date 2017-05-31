@@ -21,10 +21,15 @@ namespace BoxConsole
     {
         public static void Main(string[] args)
         {
+            FindFolderByClient();
+        }
+
+        private static void FindFolderByClient()
+        {
             var isOK = NtpLibrary.SystemTimeHack.CheckAndTryToFixSystemTime();
             if (isOK)
             {
-                Task<BoxCollection<BoxItem>> task = BoxService.FindFoldersById("28291368952");
+                Task<BoxCollection<BoxItem>> task = BoxService.FindFoldersByClient("Phoenix");
                 var awaiter = task.GetAwaiter();
 
                 awaiter.OnCompleted(() => OnFindFolderComplete(awaiter.GetResult()));
@@ -106,9 +111,11 @@ namespace BoxConsole
         {
 
         }
-        private static void OnFindFolderComplete(BoxCollection<BoxItem> f)
+        private static void OnFindFolderComplete(BoxCollection<BoxItem> foldersCollection)
         {
-
+            string baseFolderPath = @"C:\Users\derski\Desktop\JobWork\ConsoleMessage";
+            FolderManager folderManager = new FolderManager();
+            var foldersList =  folderManager.BuildFolderStructure(foldersCollection);
         }
     }
 }
