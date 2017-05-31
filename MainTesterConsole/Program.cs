@@ -10,9 +10,7 @@ namespace MainTesterConsole
     {
         static void Main(string[] args)
         {
-            NtpLibrary.NetworkTime ntp = new NtpLibrary.NetworkTime();
-            var dt = ntp.GetDateTime();
-            var sysDt = DateTime.Now;
+            
         }
     }
 }
