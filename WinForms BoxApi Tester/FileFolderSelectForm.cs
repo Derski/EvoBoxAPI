@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Extensions;
 using EvoBoxAPI;
+using System.Deployment.Application;
 
 namespace FileFolderSelector
 {
@@ -48,13 +49,51 @@ namespace FileFolderSelector
         #region Save
         private void button_Save_Click(object sender, EventArgs e)
         {
-            treeFileSelector.SaveCurrentSelection(_lastSavedFileName);
+            MessageBox.Show(ApplicationDeployment.IsNetworkDeployed.ToString());
+            if (ApplicationDeployment.IsNetworkDeployed)
+            {
+                var networkDeployedFile = TryGetDeploymentFileName();
+                try
+                {
+                    treeFileSelector.SaveCurrentSelection(networkDeployedFile);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message);
+                    throw ex;
+                }
+                
+            }
+            else
+            {
+                treeFileSelector.SaveCurrentSelection(_lastSavedFileName);
+            }
+            
         }
         #endregion
+
+        private string TryGetDeploymentFileName()
+        {
+            string fileName = "";
+            try
+            {
+                fileName = ApplicationDeployment.CurrentDeployment.DataDirectory
+                    + @"\LastSavedLocalFolderStructure.xml";
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Could not read file. Error message: " + ex.Message);
+            }
+            return fileName;
+        }
 
         #region Load
         private void button_Load_Click(object sender, EventArgs e)
         {
+            if (ApplicationDeployment.IsNetworkDeployed)
+            {
+                _lastSavedFileName = TryGetDeploymentFileName();
+            }
             treeFileSelector.LoadSavedSelection(_lastSavedFileName);
         }
         #endregion Load
