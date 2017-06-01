@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="us-ascii"?>
+<TreeView>
+  <node text="JobWork" checked="False" expanded="True" imageindex="-1">
+    <node text="ConsoleMessage" checked="False" expanded="False" imageindex="-1" />
+    <node text="DecodedData" checked="False" expanded="False" imageindex="-1" />
+    <node text="EVO SensorSimulator" checked="True" expanded="False" imageindex="-1" />
+    <node text="EVOConfigFiles" checked="False" expanded="False" imageindex="-1" />
+    <node text="EVOEncryptionExport" checked="True" expanded="False" imageindex="-1" />
+    <node text="MP Header Timing" checked="False" expanded="False" imageindex="-1" />
+    <node text="RawSampleData" checked="False" expanded="False" imageindex="-1" />
+    <node text="RollTestReport" checked="False" expanded="False" imageindex="-1" />
+    <node text="Settings" checked="False" expanded="False" imageindex="-1" />
+    <node text="Simulator_Data_Files" checked="False" expanded="False" imageindex="-1" />
+  </node>
+</TreeView>

@@ -1,12 +1,86 @@
 ﻿using System;
-using System.IO;
-using System.Runtime.Serialization;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-
+using System.Runtime.InteropServices;
+using System.Runtime.Serialization;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace NtpLibrary
 {
+    public static class SystemTimeHack
+    {
+        public static bool CheckAndTryToFixSystemTime()
+        {
+            bool isOk = true;
+            try
+            {
+                NetworkTime nt = new NetworkTime();
+                var networkTime = nt.GetDateTime();
+                var currentSysTime = DateTime.Now;
+                var timeDiff = networkTime - currentSysTime;
+
+                if (Math.Abs(timeDiff.TotalSeconds) > 30)
+                {
+                    isOk = SystemClockSetter.SetTime(networkTime);
+                }
+            }
+            catch (Exception ex)
+            {
+                isOk = false;
+                throw ex;
+            }
+
+            return isOk;
+        }
+    }
+    [StructLayout(LayoutKind.Sequential)]
+    public struct SYSTEMTIME
+    {
+        public short wYear;
+        public short wMonth;
+        public short wDayOfWeek;
+        public short wDay;
+        public short wHour;
+        public short wMinute;
+        public short wSecond;
+        public short wMilliseconds;
+    }
+
+    public static class SystemClockSetter
+    {
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern bool SetSystemTime(ref SYSTEMTIME st);
+
+        [DllImport("kernel32.dll", EntryPoint = "SetSystemTime", SetLastError = true)]
+        public extern static bool Win32SetSystemTime(ref SYSTEMTIME sysTime);
+
+        public static bool SetTime(DateTime networkDt)
+        {
+            var utc = networkDt.ToUniversalTime();
+            var nt = networkDt;
+            var hourOffset = (utc - nt).Hours;
+
+            nt = utc;
+
+            SYSTEMTIME st = new SYSTEMTIME();
+            st.wYear = (short)nt.Year; // must be short
+            st.wMonth = (short)nt.Month;
+            st.wDayOfWeek = (short)nt.DayOfWeek;
+            st.wDay = (short)nt.Day;
+            //st.wHour = (short)((nt.Hour+hourOffset)%24);
+            st.wHour = (short)nt.Hour;
+            st.wMinute = (short)nt.Minute;
+            st.wSecond = (short)nt.Second;
+            st.wMilliseconds = (short)nt.Millisecond;
+
+            var isOK = Win32SetSystemTime(ref st); // invoke this method.
+
+            return isOK;
+        }
+    }
     public class NoServerFoundException : System.Exception
     {
         public NoServerFoundException() : base() { }
@@ -34,12 +108,6 @@ namespace NtpLibrary
         public static string[] srvs = {
         "time.nist.gov",
         "pool.ntp.org",
-        "europe.pool.ntp.org",
-        "asia.pool.ntp.org",
-        "oceania.pool.ntp.org",
-        "north-america.pool.ntp.org",
-        "south-america.pool.ntp.org",
-        "africa.pool.ntp.org",
         "ntp1.inrim.it",
         "ntp2.inrim.it"
     };
@@ -50,10 +118,29 @@ namespace NtpLibrary
             lastSrv = (uint)rnd.Next(0, srvs.Length);
         }
 
+        //private async Task<IPHostEntry> getHostEntry()
+        //{
+        //    lastSrv = (uint)((lastSrv + 1) % srvs.Length);
+        //    IPHostEntry h = await Dns.GetHostEntryAsync(srvs[lastSrv]);
+
+        //    return h;
+        //}
+
+        private  IPHostEntry getHostEntry()
+        {
+            lastSrv = (uint)((lastSrv + 1) % srvs.Length);
+            IPHostEntry h = Dns.GetHostEntry(srvs[lastSrv]);
+
+            return h;
+        }
+
         private IPAddress getServer()
         {
             lastSrv = (uint)((lastSrv + 1) % srvs.Length);
-            IPAddress[] address = Dns.GetHostEntry(srvs[lastSrv]).AddressList;
+
+            //IPHostEntry h = getHostEntry().Result;// this is for the async result
+            IPHostEntry h = getHostEntry();
+            IPAddress[] address = h.AddressList;
             if (address == null || address.Length == 0)
                 throw new NoServerFoundException("no ip found");
             return address[0];
@@ -105,7 +192,7 @@ namespace NtpLibrary
                                 (ulong)BitConverter.ToUInt32(integerPart, 0) * 1000
                              + ((ulong)BitConverter.ToUInt32(fractPart, 0) * 1000)
                                 / 0x100000000L);
-                    sk.Close();
+                    sk.Shutdown(SocketShutdown.Both);
 
                     /* DateTime*/
                     DateTime date = new DateTime(1900, 1, 1);

@@ -7,46 +7,72 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-
+using Extensions;
 
 namespace EvoBoxAPI
 {
-
     public class FolderManager
     {
-        public string ClientId;
-        public string JobId;
-        public string ClientJobIdPrefix
+
+        public bool TokenValid
         {
             get
             {
-                return ClientId + "_" + JobId + "_";
+                bool valid = false;
+
+                return valid;
             }
         }
+
+        public string AdminToken
+        {
+            get
+            {
+                if(boxClient==null)
+                {
+                    return "Not Currently Authenticaten";
+                }
+                else
+                {
+                    try
+                    {
+                        return boxClient.Auth.Session.AccessToken;
+                    }
+                    catch(Exception ex)
+                    {
+                        return ex.Message;
+                    }
+                }
+                
+            }
+        }
+
         BoxClient boxClient;
 
         #region Constructor
         //Constructor
-        public FolderManager(string clientId="Phoenix",string jobId="test123")
+        public FolderManager()
         {
-            ClientId = clientId;
-            JobId = jobId;
             boxClient = EvoBoxAPI.EvoBoxService.GetAdminClient();
         }
         #endregion Constructor
 
         #region Folder Structure Create
-        public List<EvoBoxFolder> CreateNewBoxFolderStructure(List<EvoBoxFolder> localFolders)
+        public List<EvoBoxFolder> CreateNewBoxFolderStructure
+            (List<EvoBoxFolder> localFolders,
+            string clientId,
+            string jobId
+            )
         {
-            BoxFolder clientRootFolder = BoxFolderCreate(ClientId, "0", boxClient);
+            BoxFolder clientRootFolder = BoxFolderCreate(clientId, "0", boxClient);
             if(clientRootFolder != null)
             {
-                BoxFolder jobRootFolder = BoxFolderCreate(ClientId + "_" + JobId, clientRootFolder.Id, boxClient);
+                BoxFolder jobRootFolder = BoxFolderCreate(clientId + "_" + jobId, clientRootFolder.Id, boxClient);
                 if(jobRootFolder != null)
                 {
                     foreach(var folder in localFolders)
                     {
-                        CreateFolderHierarchy(folder, jobRootFolder.Id);
+                        CreateFolderHierarchy(folder, jobRootFolder.Id,clientId,jobId);
                     }
                 }
             }
@@ -54,17 +80,22 @@ namespace EvoBoxAPI
             return null;
         }
 
-        private void CreateFolderHierarchy(EvoBoxFolder currentFolder,string parentFolderId)
+        private void CreateFolderHierarchy
+            (EvoBoxFolder currentFolder,
+            string parentFolderId,
+            string clientId,
+            string jobId)
         {
+            
             BoxFolder currentBoxFolder = 
-            BoxFolderCreate(ClientId + "_" + JobId + "_" + currentFolder.FolderName, parentFolderId, boxClient);
+            BoxFolderCreate(clientId + "_" + jobId + "_" + currentFolder.FolderName, parentFolderId, boxClient);
             if(currentBoxFolder != null)
             {
                 currentFolder.BoxId = currentBoxFolder.Id;
                 currentFolder.BoxParentId = parentFolderId;
                 foreach(var childFolder in currentFolder.ChildFolders)
                 {
-                    CreateFolderHierarchy(childFolder, currentBoxFolder.Id);
+                    CreateFolderHierarchy(childFolder, currentBoxFolder.Id,clientId,jobId);
                 }
             }
         }
@@ -79,15 +110,16 @@ namespace EvoBoxAPI
         #endregion Folder Structure Create
 
         #region Map Local Folders to Box Folders on Box Folder IDs
-        public void GetBoxFolderIdsForFileFolders(List<EvoBoxFolder> localFolders)
+        public void GetBoxFolderIdsForFileFolders(List<EvoBoxFolder> localFolders, string clientId, string jobId)
         {
-            Task<BoxCollection<BoxItem>> task = EvoBoxService.FindFoldersByKeyword(ClientId,boxClient);
+            var clientJobIdPrefix = clientId + "_" + jobId + "_";
+            Task<BoxCollection<BoxItem>> task = EvoBoxService.FindFoldersByKeyword(clientId,boxClient);
             var awaiter = task.GetAwaiter();
             //awaiter.OnCompleted(() => OnFindFolderComplete(awaiter.GetResult()));
             var flattened = Flatten(localFolders);
             foreach (BoxItem boxFolder in awaiter.GetResult().Entries)
             {
-                string fileName =  boxFolder.Name.Replace(ClientJobIdPrefix, "");
+                string fileName =  boxFolder.Name.Replace(clientJobIdPrefix, "");
                 var localFolderMatch = flattened.Where(l => l.FolderName == fileName);
                 if(localFolderMatch.Count()==1)
                 {
@@ -170,14 +202,6 @@ namespace EvoBoxAPI
         #endregion Testing Only
     }
 
-    //https://stackoverflow.com/questions/18165460/how-to-search-hierarchical-data-with-linq
-    public static class Linq
-    {
-        public static IEnumerable<T> Flatten<T>(this T source, Func<T, IEnumerable<T>> selector)
-        {
-            return selector(source).SelectMany(c => Flatten(c, selector))
-                                   .Concat(new[] { source });
-        }
-    }
+
 
 }

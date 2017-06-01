@@ -10,11 +10,16 @@ using System.Windows.Forms;
 
 namespace WinForms_BoxApi_Tester
 {
-    public partial class Form1 : Form
+    public partial class Form_BoxAccountInfo : Form
     {
-        public Form1()
+        public Form_BoxAccountInfo()
         {
             InitializeComponent();
+        }
+
+        private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            System.Diagnostics.Process.Start(linkLabel1.Text);
         }
     }
 }

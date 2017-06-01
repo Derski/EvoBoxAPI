@@ -7,6 +7,7 @@ namespace EvoBoxAPI
 {
     public class EvoBoxFolder
     {
+        public bool Checked { get; set; }
         public string BoxId { get; set; }
         public string FolderName { get; set; }
 
@@ -58,10 +59,11 @@ namespace EvoBoxAPI
             BoxParentId = boxParentId;
         }
 
-        public EvoBoxFolder(string fullPath, string folderName)
+        public EvoBoxFolder(string fullPath, string folderName, bool isChecked)
         {
             FolderName = folderName;
             FullPath = fullPath;
+            Checked = isChecked;
         }
         public EvoBoxFolder(string folderName)
         {

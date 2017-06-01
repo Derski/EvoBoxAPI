@@ -4,19 +4,17 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{676E11EB-E2B3-4085-8D60-0EF4CA3F48EC}</ProjectGuid>
-    <OutputType>WinExe</OutputType>
+    <ProjectGuid>{98FFC636-FC94-49A4-8FA6-E81EF62FF618}</ProjectGuid>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>WinForms_BoxApi_Tester</RootNamespace>
-    <AssemblyName>WinForms BoxApi Tester</AssemblyName>
+    <RootNamespace>EvoBoxAPILibrary</RootNamespace>
+    <AssemblyName>EvoBoxAPILibrary</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -26,7 +24,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -99,81 +96,20 @@
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
-    <Reference Include="System.Deployment" />
-    <Reference Include="System.Drawing" />
     <Reference Include="System.Net.Http" />
-    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BoxFolderStructure.cs" />
-    <Compile Include="FileFolderSelectForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="FileFolderSelectForm.Designer.cs">
-      <DependentUpon>FileFolderSelectForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Form_FolderManager.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Form_FolderManager.Designer.cs">
-      <DependentUpon>Form_FolderManager.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Form_BoxAccountInfo.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Form_BoxAccountInfo.Designer.cs">
-      <DependentUpon>Form_BoxAccountInfo.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Program.cs" />
+    <Compile Include="EvoBoxFolder.cs" />
+    <Compile Include="EvoBoxService.cs" />
+    <Compile Include="Extensions.cs" />
+    <Compile Include="FolderManager.cs" />
+    <Compile Include="NtpLibrary.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TreeFileSelector.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="TreeFileSelector.Designer.cs" />
-    <EmbeddedResource Include="FileFolderSelectForm.resx">
-      <DependentUpon>FileFolderSelectForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Form_FolderManager.resx">
-      <DependentUpon>Form_FolderManager.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Form_BoxAccountInfo.resx">
-      <DependentUpon>Form_BoxAccountInfo.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
-    <EmbeddedResource Include="TreeFileSelector.resx" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
     <None Include="packages.config" />
-    <None Include="Properties\Settings.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-    </None>
-    <Compile Include="Properties\Settings.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Settings.settings</DependentUpon>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="LastSavedLocalFolderStructure.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\EvoBoxAPILibrary\EvoBoxAPILibrary.csproj">
-      <Project>{98ffc636-fc94-49a4-8fa6-e81ef62ff618}</Project>
-      <Name>EvoBoxAPILibrary</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets" Condition="Exists('..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets')" />
