@@ -9,34 +9,144 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
 using System.Xml;
+using Extensions;
 
 //https://www.codeproject.com/Articles/13099/Loading-and-Saving-a-TreeView-control-to-an-XML-fi
 
 namespace FileFolderSelector
 {
+    public class TreeNodeCustomData
+    {
+        public string BasePath { get; internal set; }
+        public string FileFilter { get; set; }
+        public string FullFilePath { get; set; }
+        public bool IsDirectory { get; internal set; }
+    }
+
+    public class NodeChangedEventArgs : EventArgs
+    {
+        public System.Windows.Forms.TreeNode SelectedNode;
+        public NodeChangedEventArgs(System.Windows.Forms.TreeNode selectedNode)
+        {
+            SelectedNode = selectedNode;
+        }
+    }
 
     public partial class TreeFileSelector : TreeView
     {
+        public event EventHandler<NodeChangedEventArgs> PropertyChanged;
+
+        private System.Windows.Forms.TreeNode _currentSelectedNode;
+        public TreeNode CurrentSelectedNode
+        {
+            get
+            {
+                return _currentSelectedNode;
+            }
+            set
+            {
+               if(_currentSelectedNode != value)
+                    {
+                        _currentSelectedNode = value;
+                        OnNodeChanged(new NodeChangedEventArgs(_currentSelectedNode));
+                    } 
+                
+            }
+        }
+
+        #region Hide / Show Files on Node
+        internal void DisplayFilesInSelectedNode()
+        {
+            var path = CurrentSelectedNode.FullPath;
+            DirectoryInfo info = new DirectoryInfo(path);
+            foreach( FileInfo fileInfo in info.EnumerateFiles())
+            {
+                CurrentSelectedNode.Nodes.Add(fileInfo.Name);
+            }
+        }
+
+        internal void RemoveFilesFromSelectedNode()
+        {
+            List<TreeNode> targetedForRemoval = new List<TreeNode>();
+            foreach(TreeNode node in CurrentSelectedNode.Nodes)
+            {
+                if(node.Tag==null)
+                {
+                    targetedForRemoval.Add(node);
+                }
+            }
+            foreach(TreeNode node in targetedForRemoval)
+            {
+                this.Nodes.Remove(node);
+            }
+            
+
+            //CurrentSelectedNode.Nodes.Clear();
+            
+        }
+        #endregion
+
+        protected virtual void OnNodeChanged(NodeChangedEventArgs e)
+        {
+            PropertyChanged.Invoke(this,e);
+        }
+
         public TreeFileSelector()
         {
             InitializeComponent();
             this.CheckBoxes = true;          
-            this.AfterCheck += TreeFileSelector_AfterCheck;    
+            this.AfterCheck += TreeFileSelector_AfterCheck;
+            this.AfterSelect += TreeFileSelector_AfterSelect;  
         }
 
-        public string BasePath { get; set; }
+        private void TreeFileSelector_AfterSelect(object sender, TreeViewEventArgs e)
+        {
+            CurrentSelectedNode = e.Node;
+        }
+        
         private void TreeFileSelector_AfterCheck(object sender, TreeViewEventArgs e)
         {
             //select / deselect all files in folder if folder selected
             TreeNode currentNode = e.Node;
-            
+
+            var tag = currentNode.Tag;
+            //can't check files
+            if(tag == null && currentNode.Checked)
+            {
+                currentNode.Checked = false;
+                return;
+            }
+            //check all parents 
             if(currentNode.Checked)
             {
                 RecurseUpParents(currentNode);
+                return;
+            }
+            if(!currentNode.Checked && UncheckedNodeHasCheckedChildFolders(currentNode))
+            {
+                currentNode.Checked = true;
+                return;
             }
         }
 
-        private void RecurseUpParents(TreeNode node)
+        private bool UncheckedNodeHasCheckedChildFolders(TreeNode currentNode)
+        {
+            List<TreeNode> flatNodes = new List<TreeNode>();
+            flatNodes.Add(currentNode);
+            CollectChildNodes(flatNodes,currentNode);
+            return flatNodes.Any(n => n.Checked);
+        }
+
+        private void CollectChildNodes(List<TreeNode> flatNodes, TreeNode currentNode)
+        {
+            foreach(TreeNode node in currentNode.Nodes)
+            {
+                flatNodes.Add(node);
+                CollectChildNodes(flatNodes, node);
+            }
+        }
+
+        private void RecurseUpParents(System.Windows.Forms.TreeNode node)
         {
             if (node.Parent != null)
             {
@@ -51,50 +161,41 @@ namespace FileFolderSelector
             }
         }
 
-        private bool isDirectory(string nodePath)
+        private TreeNodeCustomData CreateDirectoryTag(TreeNode node)
         {
-            bool isDirectory = false;
-            string fullFolderPath = nodePath;
-            if(BasePath != null)
-            {
-                fullFolderPath = Path.Combine(BasePath, nodePath);
-            }
-             
-            FileAttributes attr = File.GetAttributes(fullFolderPath);
-            if (attr.HasFlag(FileAttributes.Directory))
-            {
-                isDirectory = true;
-            }
-            return isDirectory;
+            TreeNodeCustomData tag = new TreeNodeCustomData();
+            tag.IsDirectory = true;
+            tag.BasePath = node.TopAncestor().FullPath; 
+            return tag;
         }
 
-
-        internal void BuildTreeFromRootDirectory(DirectoryInfo directoryInfo, TreeNodeCollection nodes, bool foldersOnly)
+        internal void BuildTreeFromRootDirectory(DirectoryInfo directoryInfo, TreeNodeCollection topNodes, bool foldersOnly)
         {
-            nodes.Clear();
             var bp =  System.IO.Directory.GetParent(directoryInfo.FullName);
             if(bp!=null)
             {
-                BasePath = bp.FullName;
-            }
-            BuildTree(directoryInfo, nodes, foldersOnly);
+                //BasePath = bp.FullName;
+                var rootFolderStructure = topNodes.Add(bp.FullName);
+                rootFolderStructure.Tag = CreateDirectoryTag(rootFolderStructure);
 
+                var firstDataNode = rootFolderStructure.Nodes.Add(directoryInfo.Name);
+                firstDataNode.Tag = CreateDirectoryTag(firstDataNode);
+
+                BuildTree(directoryInfo, firstDataNode);
+            }        
         }
-        private void BuildTree(DirectoryInfo directoryInfo, TreeNodeCollection addInMe, bool foldersOnly)
-        {  
-            TreeNode curNode = (TreeNode)addInMe.Add(directoryInfo.Name);
-            if(!foldersOnly)
-            {
-                foreach (FileInfo file in directoryInfo.GetFiles())
-                {
-                    curNode.Nodes.Add(file.FullName, file.Name);
-                }
-            }
+        private void BuildTree(DirectoryInfo directoryInfo, System.Windows.Forms.TreeNode currentNode)
+        {
             foreach (DirectoryInfo subdir in directoryInfo.GetDirectories())
             {
-                BuildTree(subdir, curNode.Nodes, foldersOnly);
+                var childNode = currentNode.Nodes.Add(subdir.Name);
+                childNode.Tag = CreateDirectoryTag(childNode);
+
+                BuildTree(subdir, childNode);
             }
         }
+
+
 
         #region Save File Section to XML
         internal void SaveCurrentSelection(string fileName)
@@ -121,7 +222,6 @@ namespace FileFolderSelector
 
         // Xml tag for node, e.g. 'node' in case of <node></node>
         private const string XmlNodeTag = "node";
-
         // Xml attributes for node e.g. <node text="Asia" tag="" 
         // imageindex="1"></node>
         private const string XmlNodeTextAtt = "text";
@@ -129,11 +229,12 @@ namespace FileFolderSelector
         private const string XmlNodeExpandedAtt = "expanded";
         private const string XmlNodeTagAtt = "tag";
         private const string XmlNodeImageIndexAtt = "imageindex";
+
         private void SaveNodes(TreeNodeCollection nodesCollection,XmlTextWriter textWriter)
         {
             for (int i = 0; i < nodesCollection.Count; i++)
             {
-                TreeNode node = nodesCollection[i];
+                System.Windows.Forms.TreeNode node = nodesCollection[i];
                 textWriter.WriteStartElement(XmlNodeTag);
                 textWriter.WriteAttributeString(XmlNodeTextAtt,
                                                            node.Text);
@@ -158,6 +259,8 @@ namespace FileFolderSelector
                 textWriter.WriteEndElement();
             }
         }
+
+
         #endregion Save File Selection to XML
 
         #region Load Selection From File
@@ -168,7 +271,7 @@ namespace FileFolderSelector
                 DeserializeTreeView(this, fileName);
             }
         }
-        public void DeserializeTreeView(TreeView treeView, string fileName)
+        private void DeserializeTreeView(TreeView treeView, string fileName)
         {
             XmlTextReader reader = null;
             try
@@ -176,14 +279,14 @@ namespace FileFolderSelector
                 // disabling re-drawing of treeview till all nodes are added
                 treeView.BeginUpdate();
                 reader = new XmlTextReader(fileName);
-                TreeNode parentNode = null;
+                System.Windows.Forms.TreeNode parentNode = null;
                 while (reader.Read())
                 {
                     if (reader.NodeType == XmlNodeType.Element)
                     {
                         if (reader.Name == XmlNodeTag)
                         {
-                            TreeNode newNode = new TreeNode();
+                            System.Windows.Forms.TreeNode newNode = new System.Windows.Forms.TreeNode();
                             bool isEmptyElement = reader.IsEmptyElement;
 
                             // loading node attributes
@@ -245,7 +348,7 @@ namespace FileFolderSelector
         /// Used by Deserialize method for setting properties of
         /// TreeNode from xml node attributes
         /// <span class="code-SummaryComment"></summary></span>
-        private void SetAttributeValue(TreeNode node,
+        private void SetAttributeValue(System.Windows.Forms.TreeNode node,
                            string propertyName, string value)
         {
             if (propertyName == XmlNodeTextAtt)

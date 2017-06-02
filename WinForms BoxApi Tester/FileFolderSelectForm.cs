@@ -20,13 +20,16 @@ namespace FileFolderSelector
         private string _lastSavedFileName = "";
         
         public TreeNodeCollection SelectedNodes { get; set; }
-        public string BasePath { get; set; }
+       // public string BasePath { get; set; }
 
         public FileFolderSelectForm(string lastSavedFileName)
         {
             InitializeComponent();
             _lastSavedFileName = lastSavedFileName;
+            treeFileSelector.PropertyChanged += TreeFileSelector_PropertyChanged;
         }
+
+
 
         private void FileFolderSelectForm_Load(object sender, EventArgs e)
         {
@@ -34,6 +37,34 @@ namespace FileFolderSelector
                 Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop),"JobWork");
             SelectNewFolderStructure(baseFolderPath);
         }
+
+        #region Node Custom Properties
+        private void TreeFileSelector_PropertyChanged(object sender, NodeChangedEventArgs e)
+        {
+            var selectedNode = e.SelectedNode;
+            label_NodeFullPath.Text = selectedNode.FullPath;
+
+        }
+        private void button_SetNodeFilter_Click(object sender, EventArgs e)
+        {
+            if(treeFileSelector.SelectedNode == null ||
+                treeFileSelector.SelectedNode.Tag == null)
+            {
+                MessageBox.Show("Please Select a valid Directory Node to set filter");
+            }
+            else
+            {
+                if(treeFileSelector.SelectedNode.Tag is TreeNodeCustomData)
+                {
+                    TreeNodeCustomData tag = (TreeNodeCustomData)treeFileSelector.SelectedNode.Tag;
+                    var filter = textBox_SelectedNodeFilter.Text;
+                    tag.FileFilter = filter;
+                    label_FolderFilter.Text = filter;
+                }
+                
+            }
+        }
+        #endregion Node Custom Properties
 
         #region Clear
         private void button_Clear_Click(object sender, EventArgs e)
@@ -113,11 +144,14 @@ namespace FileFolderSelector
         private void SelectNewFolderStructure(string baseFolderPath)
         {
             directoryInfo = new DirectoryInfo(baseFolderPath);
-            if (directoryInfo.Exists)
+            if (directoryInfo.Parent != null)
             {
-                BasePath = baseFolderPath;
                 treeFileSelector.BuildTreeFromRootDirectory
                     (directoryInfo, treeFileSelector.Nodes, checkBox_FoldersOnly.Checked);
+            }
+            else
+            {
+                MessageBox.Show("You can't select a drive root folder");
             }
         }
         #endregion
@@ -144,5 +178,28 @@ namespace FileFolderSelector
             this.Close();
         }
         #endregion Close Form
+
+        #region Show / hide Files on Selected Folder Node
+        private void button_ShowNodeFiles_Click(object sender, EventArgs e)
+        {
+            ShowFilesOnSelectedFolderNode();
+        }
+        private void ShowFilesOnSelectedFolderNode()
+        {
+            treeFileSelector.DisplayFilesInSelectedNode();
+        }
+        private void button_HideNodeFiles_Click(object sender, EventArgs e)
+        {
+            HideFilesOnSelectedFolder();
+        }
+
+        private void HideFilesOnSelectedFolder()
+        {
+            treeFileSelector.RemoveFilesFromSelectedNode();
+        }
+
+        #endregion
+
+
     }
 }

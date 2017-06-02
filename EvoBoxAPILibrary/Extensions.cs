@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace Extensions
 {
@@ -14,5 +15,22 @@ namespace Extensions
             return selector(source).SelectMany(c => Flatten(c, selector))
                                    .Concat(new[] { source });
         }
+
+
     }
+
+    public static class TreeNodeExtensions
+    {
+        public static TreeNode TopAncestor(this TreeNode treenode)
+        {
+            TreeNode currentNode = treenode;
+            while (currentNode.Parent != null)
+            {
+                currentNode = currentNode.Parent;
+            }
+            return currentNode;
+        }
+    }
+
+
 }

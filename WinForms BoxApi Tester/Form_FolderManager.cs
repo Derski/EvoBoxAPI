@@ -89,8 +89,9 @@ namespace WinForms_BoxApi_Tester
             var result =  folderSelector.ShowDialog();
             if(result == DialogResult.OK)
             {
-                var basePath = folderSelector.BasePath;
-                List<EvoBoxFolder> boxFolders = BoxFolderStructure.CreateLocalEvoBoxFolderStructure(folderSelector.SelectedNodes,basePath);
+                //var basePath = folderSelector.BasePath;
+                var basePath = "foobar";//todo base path must come from the nodes because we can have multiple top nodes
+                List <EvoBoxFolder> boxFolders = BoxFolderStructure.CreateLocalEvoBoxFolderStructure(folderSelector.SelectedNodes,basePath);
                 EvoBoxFolders = boxFolders;
                 List<EvoBoxFolder> flatList = new List<EvoBoxFolder>();
                 foreach (var f in boxFolders)
