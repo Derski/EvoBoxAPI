@@ -3,14 +3,10 @@ using Box.V2.Auth;
 using Box.V2.Config;
 using Box.V2.JWTAuth;
 using Box.V2.Models;
-using Box.V2.Models.Request;
+using EvoBoxAPILibrary;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
-
 
 // this is a useful link:  https://github.com/box/box-windows-sdk-v2/tree/master/Box.V2/Managers
 
@@ -23,9 +19,22 @@ namespace EvoBoxAPI
             BoxClient adminClient = null;
 
             //var jsonPath = Path.Combine(AppContext.BaseDirectory, @"EvoBoxAPI\BoxConfig.json");
-            var jsonPath = @"C:\Users\cderkowski\Source\Repos\EvoBoxAPI\src\EvoBoxAPI\BoxConfig.json";
-            Stream jsonFileStream = new FileStream(jsonPath, FileMode.Open);
-            IBoxConfig boxConfig = Box.V2.Config.BoxConfig.CreateFromJsonFile(jsonFileStream);
+            //var jsonPath = @"C:\Users\cderkowski\Source\Repos\EvoBoxAPI\src\EvoBoxAPI\BoxConfig.json";
+            //Stream jsonFileStream = new FileStream(jsonPath, FileMode.Open);
+            //IBoxConfig boxConfig = Box.V2.Config.BoxConfig.CreateFromJsonFile(jsonFileStream);
+
+            //IBoxConfig boxConfig = Box.V2.Config.BoxConfig.CreateFromJsonString();
+
+            BoxConfig boxConfig = new BoxConfig
+                (
+                BoxConfigClass.clientID, 
+                BoxConfigClass.clientSecret, 
+                BoxConfigClass.enterpriseID, 
+                BoxConfigClass.privateKey,
+                BoxConfigClass.passphrase, 
+                BoxConfigClass.publicKeyID
+                );
+
             BoxJWTAuth boxJWT;
             boxJWT = new BoxJWTAuth(boxConfig);
             NtpLibrary.SystemTimeHack.CheckAndTryToFixSystemTime();

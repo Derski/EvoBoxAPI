@@ -100,6 +100,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BoxConfig.cs" />
     <Compile Include="EvoBoxFolder.cs" />
     <Compile Include="EvoBoxService.cs" />
     <Compile Include="Extensions.cs" />
@@ -109,6 +110,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <Content Include="BoxConfig.json" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
