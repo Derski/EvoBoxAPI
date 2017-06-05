@@ -59,7 +59,7 @@ namespace EvoBoxAPI
 
         #region Folder Structure Create
         public List<EvoBoxFolder> CreateNewBoxFolderStructure
-            (List<EvoBoxFolder> localFolders,
+            (EvoBoxFolder localFolder,
             string clientId,
             string jobId
             )
@@ -70,10 +70,7 @@ namespace EvoBoxAPI
                 BoxFolder jobRootFolder = BoxFolderCreate(clientId + "_" + jobId, clientRootFolder.Id, boxClient);
                 if(jobRootFolder != null)
                 {
-                    foreach(var folder in localFolders)
-                    {
-                        CreateFolderHierarchy(folder, jobRootFolder.Id,clientId,jobId);
-                    }
+                    CreateFolderHierarchy(localFolder, jobRootFolder.Id,clientId,jobId);  
                 }
             }
 
@@ -109,17 +106,48 @@ namespace EvoBoxAPI
         }
         #endregion Folder Structure Create
 
-        #region Map Local Folders to Box Folders on Box Folder IDs
-        public void GetBoxFolderIdsForFileFolders(List<EvoBoxFolder> localFolders, string clientId, string jobId)
+        #region Find
+
+        public BoxItem FindRootClientFolder(string clientId)
         {
-            var clientJobIdPrefix = clientId + "_" + jobId + "_";
-            Task<BoxCollection<BoxItem>> task = EvoBoxService.FindFoldersByKeyword(clientId,boxClient);
+            Task<BoxCollection<BoxItem>> task = EvoBoxService.FindFoldersByKeyword(clientId, boxClient);
+            var awaiter = task.GetAwaiter();
+            foreach (BoxItem boxFolder in awaiter.GetResult().Entries)
+            {
+                if(boxFolder.Name.Equals(clientId))
+                {
+                    return boxFolder;
+                }
+            }
+                return null;
+        }
+
+        public BoxItem FindRootJobIdFolder(string parentId, string clientJobPrefix)
+        {
+            Task<BoxCollection<BoxItem>> task = EvoBoxService.FindFoldersByKeyword(clientJobPrefix, boxClient);
+            var awaiter = task.GetAwaiter();
+            foreach (BoxItem boxFolder in awaiter.GetResult().Entries)
+            {
+                if (boxFolder.Parent.Id==parentId)
+                {
+                    return boxFolder;
+                }
+            }
+            return null;
+        }
+
+        #endregion
+
+        #region Map Local Folders to Box Folders on Box Folder IDs
+        public void GetBoxFolderIdsForFileFolders(List<EvoBoxFolder> localFolders, string clientJobPrefix)
+        {
+            Task<BoxCollection<BoxItem>> task = EvoBoxService.FindFoldersByKeyword(clientJobPrefix, boxClient);
             var awaiter = task.GetAwaiter();
             //awaiter.OnCompleted(() => OnFindFolderComplete(awaiter.GetResult()));
             var flattened = Flatten(localFolders);
             foreach (BoxItem boxFolder in awaiter.GetResult().Entries)
             {
-                string fileName =  boxFolder.Name.Replace(clientJobIdPrefix, "");
+                string fileName =  boxFolder.Name.Replace(clientJobPrefix, "");
                 var localFolderMatch = flattened.Where(l => l.FolderName == fileName);
                 if(localFolderMatch.Count()==1)
                 {

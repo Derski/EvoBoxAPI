@@ -11,8 +11,10 @@ namespace EvoBoxAPI
         public string BoxId { get; set; }
         public string FolderName { get; set; }
 
+        //ClientJobPrefix_FolderName
         public string BoxFolderName { get; set; }
 
+        //local file path
         public string FullPath { get; set; }
 
         public string BoxParentId { get; set; }

@@ -102,10 +102,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BoxConfig.cs" />
+    <Compile Include="BoxFolderStructure.cs" />
+    <Compile Include="ClientJobInfo.cs" />
+    <Compile Include="ClientJobInfo_TestData.cs" />
     <Compile Include="EvoBoxFolder.cs" />
     <Compile Include="EvoBoxService.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="FolderManager.cs" />
+    <Compile Include="IClientJobInfo.cs" />
     <Compile Include="NtpLibrary.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

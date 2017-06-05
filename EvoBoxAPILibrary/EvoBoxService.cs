@@ -62,8 +62,11 @@ namespace EvoBoxAPI
             {
                 BoxClient adminClient = GetAdminClient();
                 var searchManager = adminClient.SearchManager;
-                var searchResults = await searchManager.SearchAsync(keyword);
-                return searchResults;
+                //var searchResults = await searchManager.SearchAsync(keyword);
+                var searchResults =  searchManager.SearchAsync(keyword);
+                //return searchResults;
+
+                return searchResults.Result;
 
             }
             catch (Exception ex)

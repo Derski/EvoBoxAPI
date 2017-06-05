@@ -16,8 +16,15 @@ namespace WinForms_BoxApi_Tester
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            //Application.Run(new Form1());
-            Application.Run(new TestForm());
+            Application.Run(new Form_FolderManager());
         }
+
+        private static void Testid()
+        {
+
+        }
+
     }
+
+    
 }

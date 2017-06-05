@@ -21,6 +21,43 @@ namespace FileFolderSelector
         public string FileFilter { get; set; }
         public string FullFilePath { get; set; }
         public bool IsDirectory { get; internal set; }
+
+        public string CustomTagAsString
+        {
+            get
+            {
+                return "BasePath=" + BasePath +
+                    "," +
+                    "FileFilter=" + FileFilter +
+                    "," +
+                    "FullFilePath=" + FullFilePath +
+                    "," +
+                    "IsDirectory=" + IsDirectory.ToString();
+            }
+        }
+
+        public TreeNodeCustomData(string customTagSavedXML)
+        {
+            var customTagArray = customTagSavedXML.Split(',');
+
+            var basePathArray = customTagArray[0].Split('=');//Basepath
+            BasePath = basePathArray[1];
+
+            var fileFilterArray = customTagArray[1].Split('=');//FileFilter
+            FileFilter = fileFilterArray[1];
+
+            var fullFilePathArray = customTagArray[2].Split('=');//FileFilter
+            FullFilePath = fullFilePathArray[1];
+
+            var isDirectoryArray = customTagArray[3].Split('=');//FileFilter
+            bool isDirectoryTryParseResult = true;
+            bool.TryParse(isDirectoryArray[1], out isDirectoryTryParseResult);
+            IsDirectory = isDirectoryTryParseResult;
+        }
+        public TreeNodeCustomData()
+        {
+
+        }
     }
 
     public class NodeChangedEventArgs : EventArgs
@@ -165,7 +202,9 @@ namespace FileFolderSelector
         {
             TreeNodeCustomData tag = new TreeNodeCustomData();
             tag.IsDirectory = true;
-            tag.BasePath = node.TopAncestor().FullPath; 
+            tag.BasePath = node.TopAncestor().FullPath;
+            tag.FileFilter = "*.*";//default file filter
+            tag.FullFilePath = node.FullPath;
             return tag;
         }
 
@@ -194,8 +233,6 @@ namespace FileFolderSelector
                 BuildTree(subdir, childNode);
             }
         }
-
-
 
         #region Save File Section to XML
         internal void SaveCurrentSelection(string fileName)
@@ -249,8 +286,10 @@ namespace FileFolderSelector
                 textWriter.WriteAttributeString(
                     XmlNodeImageIndexAtt, node.ImageIndex.ToString());
                 if (node.Tag != null)
-                    textWriter.WriteAttributeString(XmlNodeTagAtt,
-                                                node.Tag.ToString());
+                {
+                    TreeNodeCustomData customTagNode = (TreeNodeCustomData)node.Tag;
+                    textWriter.WriteAttributeString(XmlNodeTagAtt, customTagNode.CustomTagAsString);
+                }  
                 // add other node properties to serialize here  
                 if (node.Nodes.Count > 0)
                 {
@@ -268,6 +307,7 @@ namespace FileFolderSelector
         {
             if(File.Exists(fileName))
             {
+                this.Nodes.Clear();
                 DeserializeTreeView(this, fileName);
             }
         }
@@ -361,7 +401,7 @@ namespace FileFolderSelector
             }
             else if (propertyName == XmlNodeTagAtt)
             {
-                node.Tag = value;
+                node.Tag = new TreeNodeCustomData(value);
             }
             else if (propertyName == XmlNodeCheckedAtt)
             {

@@ -11,17 +11,23 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Extensions;
-
+using Box.V2.Models;
 
 namespace WinForms_BoxApi_Tester
 {
-    public partial class Form1 : Form
+    public partial class Form_FolderManager : Form
     {
         FolderManager folderManager;
-        private string _lastSavedLocalFolders;
-        public List<EvoBoxFolder> EvoBoxFolders { get; set; }
+        public string ClientJobPrefix
+        {
+            get
+            {
+                return textBox_ClientId.Text + "_" + textBox_JobId.Text;
+            }
+        }
+       public EvoBoxFolder EvoBoxFolder { get; set; }
 
-        public Form1()
+        public Form_FolderManager()
         {
             InitializeComponent();
         }
@@ -34,8 +40,6 @@ namespace WinForms_BoxApi_Tester
         private void InitializeDefaults()
         {
             UpdatePrefix();
-            _lastSavedLocalFolders 
-                = Path.Combine(Environment.CurrentDirectory, "LastSavedLocalFolderStructure.xml");
         }
 
         private void button_GetToken_Click(object sender, EventArgs e)
@@ -73,11 +77,6 @@ namespace WinForms_BoxApi_Tester
         }
         #endregion Client Id and Job Prefix
 
-        private void toolStripStatusLabel1_DoubleClick(object sender, EventArgs e)
-        {
-            System.Diagnostics.Process.Start(toolStripStatusLabel1.Text);
-        }
-
         #region Select Local Folders
         private void button_LocalFolderSelection_Click(object sender, EventArgs e)
         {
@@ -85,22 +84,15 @@ namespace WinForms_BoxApi_Tester
         }
         private void SelectLocalFolders()
         {
-            FileFolderSelectForm folderSelector = new FileFolderSelectForm(_lastSavedLocalFolders);
+            FileFolderSelectForm folderSelector = new FileFolderSelectForm();
             var result =  folderSelector.ShowDialog();
             if(result == DialogResult.OK)
             {
-                //var basePath = folderSelector.BasePath;
-                var basePath = "foobar";//todo base path must come from the nodes because we can have multiple top nodes
-                List <EvoBoxFolder> boxFolders = BoxFolderStructure.CreateLocalEvoBoxFolderStructure(folderSelector.SelectedNodes,basePath);
-                EvoBoxFolders = boxFolders;
-                List<EvoBoxFolder> flatList = new List<EvoBoxFolder>();
-                foreach (var f in boxFolders)
-                {
-                    var flatted = f.Flatten(x => x.ChildFolders);
-                    flatList.AddRange(flatted);
-                }
-                button_CreateBoxFolders.Enabled = true;
-                richTextBox1.Text = string.Join("\n", flatList.Where(a=>a.Checked).Select(x => x.FullPath).ToArray());
+                EvoBoxFolder  = BoxFolderStructure.CreateLocalEvoBoxFolderStructure
+                    (folderSelector.SelectedNodes,textBox_ClientId.Text,textBox_JobId.Text);
+                richTextBox_BoxNodes.Text +=
+                        string.Join("\n", EvoBoxFolder.Flatten(x => x.ChildFolders).Select(n => n.FullPath))+"\n";
+                
             }
         }
         
@@ -114,10 +106,76 @@ namespace WinForms_BoxApi_Tester
         private void CreateBoxFolders()
         {
             folderManager.CreateNewBoxFolderStructure
-                (EvoBoxFolders,
+                (EvoBoxFolder,
                 textBox_ClientId.Text,
                 textBox_JobId.Text);
         }
         #endregion
+
+        private void button_Validate_Click(object sender, EventArgs e)
+        {
+            var Errors = ValidateBeforeBoxAction();
+            if(Errors!= null)
+            {
+                button_CreateBoxFolders.Enabled = false;
+                var userErrors = string.Join("\n", Errors.ToArray());
+                MessageBox.Show(userErrors, "Box Folder Errors");
+            }
+            else
+            {
+                ValidateWithBox();
+                button_CreateBoxFolders.Enabled = true;
+            }
+        }
+
+
+        private List<string> ValidateBeforeBoxAction()
+        {
+            var adminToken = !string.IsNullOrEmpty(textBox_AdminToken.Text);
+            var clientId = !string.IsNullOrEmpty(textBox_ClientId.Text);
+            var jobId = !string.IsNullOrEmpty(textBox_JobId.Text);
+            var boxFolders = EvoBoxFolder != null;
+
+            if (adminToken && clientId && jobId && boxFolders)
+            {
+                
+            }
+            else
+            {
+                List<string> Errors = new List<string>();
+                Errors.Add("Please fix the following issues before attempting to create the box folder structure.\n");
+                if (!adminToken)
+                {
+                    Errors.Add("Please get An Admin Token.");
+                }
+                if (!clientId)
+                {
+                    Errors.Add("Please set the Client Id");
+                }
+                if (!jobId)
+                {
+                    Errors.Add("Please set the Job Id.");
+                }
+                if (!boxFolders)
+                {
+                    Errors.Add("Please select folders to be created in the box account");
+                }
+                return Errors;
+            }
+            return null;
+        }
+        private void ValidateWithBox()
+        {
+            var clientId = textBox_ClientId.Text;
+            BoxItem  clientBoxItem = folderManager.FindRootClientFolder(clientId);
+            BoxItem clientJobIdBoxItem;
+            if(clientBoxItem != null)
+            {
+                clientJobIdBoxItem =
+                folderManager.FindRootJobIdFolder(clientBoxItem.Id, ClientJobPrefix);
+
+            }
+        }
+
     }
 }

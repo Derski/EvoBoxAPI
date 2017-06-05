@@ -11,21 +11,37 @@ using System.Windows.Forms;
 using Extensions;
 using EvoBoxAPI;
 using System.Deployment.Application;
+using System.Text.RegularExpressions;
 
 namespace FileFolderSelector
 {
     public partial class FileFolderSelectForm : Form
     {
         private DirectoryInfo directoryInfo;
-        private string _lastSavedFileName = "";
         
+        private string _lastSavedFileName
+        {
+            get
+            {
+                var _file = Path.Combine
+                    (Environment.CurrentDirectory, "LastSavedLocalFolderStructure.xml");
+                if (ApplicationDeployment.IsNetworkDeployed)
+                {
+                    _file = TryGetDeploymentFileName(); 
+
+                }
+                return _file;
+            }
+        }
+
         public TreeNodeCollection SelectedNodes { get; set; }
        // public string BasePath { get; set; }
 
-        public FileFolderSelectForm(string lastSavedFileName)
+
+
+        public FileFolderSelectForm()
         {
             InitializeComponent();
-            _lastSavedFileName = lastSavedFileName;
             treeFileSelector.PropertyChanged += TreeFileSelector_PropertyChanged;
         }
 
@@ -33,9 +49,7 @@ namespace FileFolderSelector
 
         private void FileFolderSelectForm_Load(object sender, EventArgs e)
         {
-            string baseFolderPath =
-                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop),"JobWork");
-            SelectNewFolderStructure(baseFolderPath);
+            LoadTreeFromXML();
         }
 
         #region Node Custom Properties
@@ -43,25 +57,31 @@ namespace FileFolderSelector
         {
             var selectedNode = e.SelectedNode;
             label_NodeFullPath.Text = selectedNode.FullPath;
-
+            if(selectedNode.Tag != null)
+            {
+                TreeNodeCustomData customTag = (TreeNodeCustomData)selectedNode.Tag;
+                textBox_SelectedNodeFilter.Text = customTag.FileFilter;
+            }
         }
         private void button_SetNodeFilter_Click(object sender, EventArgs e)
         {
-            if(treeFileSelector.SelectedNode == null ||
-                treeFileSelector.SelectedNode.Tag == null)
+            if(string.IsNullOrEmpty(errorProvider1.GetError(textBox_SelectedNodeFilter)))
             {
-                MessageBox.Show("Please Select a valid Directory Node to set filter");
-            }
-            else
-            {
-                if(treeFileSelector.SelectedNode.Tag is TreeNodeCustomData)
+                if (treeFileSelector.SelectedNode == null ||
+                    treeFileSelector.SelectedNode.Tag == null)
                 {
-                    TreeNodeCustomData tag = (TreeNodeCustomData)treeFileSelector.SelectedNode.Tag;
-                    var filter = textBox_SelectedNodeFilter.Text;
-                    tag.FileFilter = filter;
-                    label_FolderFilter.Text = filter;
+                    MessageBox.Show("Please Select a valid Directory Node to set filter");
                 }
-                
+                else
+                {
+                    if (treeFileSelector.SelectedNode.Tag is TreeNodeCustomData)
+                    {
+                        TreeNodeCustomData tag = (TreeNodeCustomData)treeFileSelector.SelectedNode.Tag;
+                        var filter = textBox_SelectedNodeFilter.Text;
+                        tag.FileFilter = filter;
+                        label_FolderFilter.Text = filter;
+                    }
+                }
             }
         }
         #endregion Node Custom Properties
@@ -80,26 +100,7 @@ namespace FileFolderSelector
         #region Save
         private void button_Save_Click(object sender, EventArgs e)
         {
-            MessageBox.Show(ApplicationDeployment.IsNetworkDeployed.ToString());
-            if (ApplicationDeployment.IsNetworkDeployed)
-            {
-                var networkDeployedFile = TryGetDeploymentFileName();
-                try
-                {
-                    treeFileSelector.SaveCurrentSelection(networkDeployedFile);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.Message);
-                    throw ex;
-                }
-                
-            }
-            else
-            {
-                treeFileSelector.SaveCurrentSelection(_lastSavedFileName);
-            }
-            
+            treeFileSelector.SaveCurrentSelection(_lastSavedFileName);
         }
         #endregion
 
@@ -121,12 +122,13 @@ namespace FileFolderSelector
         #region Load
         private void button_Load_Click(object sender, EventArgs e)
         {
-            if (ApplicationDeployment.IsNetworkDeployed)
-            {
-                _lastSavedFileName = TryGetDeploymentFileName();
-            }
+            LoadTreeFromXML();
+        }
+        private void LoadTreeFromXML()
+        {
             treeFileSelector.LoadSavedSelection(_lastSavedFileName);
         }
+
         #endregion Load
 
         #region Select New Folder
@@ -147,7 +149,7 @@ namespace FileFolderSelector
             if (directoryInfo.Parent != null)
             {
                 treeFileSelector.BuildTreeFromRootDirectory
-                    (directoryInfo, treeFileSelector.Nodes, checkBox_FoldersOnly.Checked);
+                    (directoryInfo, treeFileSelector.Nodes, true);
             }
             else
             {
@@ -198,8 +200,23 @@ namespace FileFolderSelector
             treeFileSelector.RemoveFilesFromSelectedNode();
         }
 
+
         #endregion
 
-
+        private void textBox_SelectedNodeFilter_Validating(object sender, CancelEventArgs e)
+        {
+            var filter = @"(\*.\w+$(\|\*.\w+)*)|\*.\*";
+            Regex rgx = new Regex(filter, RegexOptions.IgnoreCase);
+            bool isMatch = rgx.IsMatch(textBox_SelectedNodeFilter.Text);
+            if(isMatch)
+            {
+                errorProvider1.SetError(textBox_SelectedNodeFilter, "");
+            }
+            else
+            {
+                errorProvider1.SetError(textBox_SelectedNodeFilter, "Incorrect File Filter Expression\n"+
+                    "Please specify the file filter in the form *.txt|*.evoset|*.csv");
+            }
+        }
     }
 }

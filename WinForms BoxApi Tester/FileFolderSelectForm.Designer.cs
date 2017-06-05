@@ -30,30 +30,31 @@
         {
             this.components = new System.ComponentModel.Container();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.treeFileSelector = new FileFolderSelector.TreeFileSelector();
             this.button_Select = new System.Windows.Forms.Button();
             this.button_Save = new System.Windows.Forms.Button();
             this.button_Clear = new System.Windows.Forms.Button();
             this.button_Load = new System.Windows.Forms.Button();
-            this.checkBox_FoldersOnly = new System.Windows.Forms.CheckBox();
             this.button_OK = new System.Windows.Forms.Button();
             this.button_Cancel = new System.Windows.Forms.Button();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.button_HideNodeFiles = new System.Windows.Forms.Button();
+            this.label_FolderFilter = new System.Windows.Forms.Label();
+            this.label_FolderFilterLbl = new System.Windows.Forms.Label();
             this.button_SetNodeFilter = new System.Windows.Forms.Button();
             this.label_NodeFullPath = new System.Windows.Forms.Label();
             this.label_SelectedNodeFullPath = new System.Windows.Forms.Label();
             this.button_ShowNodeFiles = new System.Windows.Forms.Button();
             this.textBox_SelectedNodeFilter = new System.Windows.Forms.TextBox();
             this.label_FileFilter = new System.Windows.Forms.Label();
-            this.label_FolderFilterLbl = new System.Windows.Forms.Label();
-            this.label_FolderFilter = new System.Windows.Forms.Label();
-            this.button_HideNodeFiles = new System.Windows.Forms.Button();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-            this.treeFileSelector = new FileFolderSelector.TreeFileSelector();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.addToFilterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.errorProvider1 = new System.Windows.Forms.ErrorProvider(this.components);
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.contextMenuStrip1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.errorProvider1)).BeginInit();
             this.SuspendLayout();
             // 
             // groupBox1
@@ -66,13 +67,23 @@
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Select Files";
             // 
+            // treeFileSelector
+            // 
+            this.treeFileSelector.CheckBoxes = true;
+            this.treeFileSelector.CurrentSelectedNode = null;
+            this.treeFileSelector.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.treeFileSelector.Location = new System.Drawing.Point(3, 18);
+            this.treeFileSelector.Name = "treeFileSelector";
+            this.treeFileSelector.Size = new System.Drawing.Size(483, 374);
+            this.treeFileSelector.TabIndex = 0;
+            // 
             // button_Select
             // 
             this.button_Select.Location = new System.Drawing.Point(15, 589);
             this.button_Select.Name = "button_Select";
             this.button_Select.Size = new System.Drawing.Size(117, 23);
             this.button_Select.TabIndex = 2;
-            this.button_Select.Text = "Select Files";
+            this.button_Select.Text = "Add Folder";
             this.button_Select.UseVisualStyleBackColor = true;
             this.button_Select.Click += new System.EventHandler(this.button_Select_Click);
             // 
@@ -105,18 +116,6 @@
             this.button_Load.Text = "Load Saved";
             this.button_Load.UseVisualStyleBackColor = true;
             this.button_Load.Click += new System.EventHandler(this.button_Load_Click);
-            // 
-            // checkBox_FoldersOnly
-            // 
-            this.checkBox_FoldersOnly.AutoSize = true;
-            this.checkBox_FoldersOnly.Checked = true;
-            this.checkBox_FoldersOnly.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBox_FoldersOnly.Location = new System.Drawing.Point(15, 619);
-            this.checkBox_FoldersOnly.Name = "checkBox_FoldersOnly";
-            this.checkBox_FoldersOnly.Size = new System.Drawing.Size(110, 21);
-            this.checkBox_FoldersOnly.TabIndex = 6;
-            this.checkBox_FoldersOnly.Text = "Folders Only";
-            this.checkBox_FoldersOnly.UseVisualStyleBackColor = true;
             // 
             // button_OK
             // 
@@ -156,11 +155,39 @@
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Selected Node";
             // 
+            // button_HideNodeFiles
+            // 
+            this.button_HideNodeFiles.Location = new System.Drawing.Point(96, 140);
+            this.button_HideNodeFiles.Name = "button_HideNodeFiles";
+            this.button_HideNodeFiles.Size = new System.Drawing.Size(84, 23);
+            this.button_HideNodeFiles.TabIndex = 8;
+            this.button_HideNodeFiles.Text = "Hide Files";
+            this.button_HideNodeFiles.UseVisualStyleBackColor = true;
+            this.button_HideNodeFiles.Click += new System.EventHandler(this.button_HideNodeFiles_Click);
+            // 
+            // label_FolderFilter
+            // 
+            this.label_FolderFilter.AutoSize = true;
+            this.label_FolderFilter.Location = new System.Drawing.Point(104, 42);
+            this.label_FolderFilter.Name = "label_FolderFilter";
+            this.label_FolderFilter.Size = new System.Drawing.Size(13, 17);
+            this.label_FolderFilter.TabIndex = 7;
+            this.label_FolderFilter.Text = "*";
+            // 
+            // label_FolderFilterLbl
+            // 
+            this.label_FolderFilterLbl.AutoSize = true;
+            this.label_FolderFilterLbl.Location = new System.Drawing.Point(7, 42);
+            this.label_FolderFilterLbl.Name = "label_FolderFilterLbl";
+            this.label_FolderFilterLbl.Size = new System.Drawing.Size(90, 17);
+            this.label_FolderFilterLbl.TabIndex = 6;
+            this.label_FolderFilterLbl.Text = "Current Filter";
+            // 
             // button_SetNodeFilter
             // 
-            this.button_SetNodeFilter.Location = new System.Drawing.Point(419, 73);
+            this.button_SetNodeFilter.Location = new System.Drawing.Point(423, 73);
             this.button_SetNodeFilter.Name = "button_SetNodeFilter";
-            this.button_SetNodeFilter.Size = new System.Drawing.Size(58, 23);
+            this.button_SetNodeFilter.Size = new System.Drawing.Size(54, 23);
             this.button_SetNodeFilter.TabIndex = 5;
             this.button_SetNodeFilter.Text = "Set";
             this.button_SetNodeFilter.UseVisualStyleBackColor = true;
@@ -198,9 +225,10 @@
             // 
             this.textBox_SelectedNodeFilter.Location = new System.Drawing.Point(107, 73);
             this.textBox_SelectedNodeFilter.Name = "textBox_SelectedNodeFilter";
-            this.textBox_SelectedNodeFilter.Size = new System.Drawing.Size(306, 22);
+            this.textBox_SelectedNodeFilter.Size = new System.Drawing.Size(294, 22);
             this.textBox_SelectedNodeFilter.TabIndex = 1;
-            this.toolTip1.SetToolTip(this.textBox_SelectedNodeFilter, "\"*.txt|*.evoset|*.csv\"");
+            this.toolTip1.SetToolTip(this.textBox_SelectedNodeFilter, "ex \"*.txt|*.evoset|*.csv\"");
+            this.textBox_SelectedNodeFilter.Validating += new System.ComponentModel.CancelEventHandler(this.textBox_SelectedNodeFilter_Validating);
             // 
             // label_FileFilter
             // 
@@ -210,44 +238,6 @@
             this.label_FileFilter.Size = new System.Drawing.Size(68, 17);
             this.label_FileFilter.TabIndex = 0;
             this.label_FileFilter.Text = "Set Filter:";
-            // 
-            // label_FolderFilterLbl
-            // 
-            this.label_FolderFilterLbl.AutoSize = true;
-            this.label_FolderFilterLbl.Location = new System.Drawing.Point(7, 42);
-            this.label_FolderFilterLbl.Name = "label_FolderFilterLbl";
-            this.label_FolderFilterLbl.Size = new System.Drawing.Size(90, 17);
-            this.label_FolderFilterLbl.TabIndex = 6;
-            this.label_FolderFilterLbl.Text = "Current Filter";
-            // 
-            // label_FolderFilter
-            // 
-            this.label_FolderFilter.AutoSize = true;
-            this.label_FolderFilter.Location = new System.Drawing.Point(104, 42);
-            this.label_FolderFilter.Name = "label_FolderFilter";
-            this.label_FolderFilter.Size = new System.Drawing.Size(13, 17);
-            this.label_FolderFilter.TabIndex = 7;
-            this.label_FolderFilter.Text = "*";
-            // 
-            // button_HideNodeFiles
-            // 
-            this.button_HideNodeFiles.Location = new System.Drawing.Point(96, 140);
-            this.button_HideNodeFiles.Name = "button_HideNodeFiles";
-            this.button_HideNodeFiles.Size = new System.Drawing.Size(84, 23);
-            this.button_HideNodeFiles.TabIndex = 8;
-            this.button_HideNodeFiles.Text = "Hide Files";
-            this.button_HideNodeFiles.UseVisualStyleBackColor = true;
-            this.button_HideNodeFiles.Click += new System.EventHandler(this.button_HideNodeFiles_Click);
-            // 
-            // treeFileSelector
-            // 
-            this.treeFileSelector.CheckBoxes = true;
-            this.treeFileSelector.CurrentSelectedNode = null;
-            this.treeFileSelector.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.treeFileSelector.Location = new System.Drawing.Point(3, 18);
-            this.treeFileSelector.Name = "treeFileSelector";
-            this.treeFileSelector.Size = new System.Drawing.Size(483, 374);
-            this.treeFileSelector.TabIndex = 0;
             // 
             // contextMenuStrip1
             // 
@@ -263,6 +253,10 @@
             this.addToFilterToolStripMenuItem.Size = new System.Drawing.Size(170, 26);
             this.addToFilterToolStripMenuItem.Text = "Add To Filter";
             // 
+            // errorProvider1
+            // 
+            this.errorProvider1.ContainerControl = this;
+            // 
             // FileFolderSelectForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -271,7 +265,6 @@
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.button_Cancel);
             this.Controls.Add(this.button_OK);
-            this.Controls.Add(this.checkBox_FoldersOnly);
             this.Controls.Add(this.button_Load);
             this.Controls.Add(this.button_Clear);
             this.Controls.Add(this.button_Save);
@@ -286,8 +279,8 @@
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
             this.contextMenuStrip1.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.errorProvider1)).EndInit();
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
@@ -299,7 +292,6 @@
         private System.Windows.Forms.Button button_Save;
         private System.Windows.Forms.Button button_Clear;
         private System.Windows.Forms.Button button_Load;
-        private System.Windows.Forms.CheckBox checkBox_FoldersOnly;
         private System.Windows.Forms.Button button_OK;
         private System.Windows.Forms.Button button_Cancel;
         private System.Windows.Forms.GroupBox groupBox2;
@@ -315,5 +307,6 @@
         private System.Windows.Forms.ToolTip toolTip1;
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
         private System.Windows.Forms.ToolStripMenuItem addToFilterToolStripMenuItem;
+        private System.Windows.Forms.ErrorProvider errorProvider1;
     }
 }

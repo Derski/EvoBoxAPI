@@ -1,6 +1,6 @@
 ﻿namespace WinForms_BoxApi_Tester
 {
-    partial class Form1
+    partial class Form_FolderManager
     {
         /// <summary>
         /// Required designer variable.
@@ -32,9 +32,8 @@
             this.textBox_AdminToken = new System.Windows.Forms.TextBox();
             this.groupBox_FolderManager = new System.Windows.Forms.GroupBox();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
-            this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.richTextBox1 = new System.Windows.Forms.RichTextBox();
+            this.richTextBox_BoxNodes = new System.Windows.Forms.RichTextBox();
             this.label_LocalFolderSelection = new System.Windows.Forms.Label();
             this.button_LocalFolderSelection = new System.Windows.Forms.Button();
             this.label_ClientJobBoxFolders = new System.Windows.Forms.Label();
@@ -48,8 +47,8 @@
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.panel1 = new System.Windows.Forms.Panel();
             this.button_BoxAccountInfo = new System.Windows.Forms.Button();
+            this.button_Validate = new System.Windows.Forms.Button();
             this.groupBox_FolderManager.SuspendLayout();
-            this.statusStrip1.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -70,11 +69,12 @@
             this.textBox_AdminToken.Location = new System.Drawing.Point(105, 4);
             this.textBox_AdminToken.Name = "textBox_AdminToken";
             this.textBox_AdminToken.ReadOnly = true;
-            this.textBox_AdminToken.Size = new System.Drawing.Size(640, 22);
+            this.textBox_AdminToken.Size = new System.Drawing.Size(786, 22);
             this.textBox_AdminToken.TabIndex = 1;
             // 
             // groupBox_FolderManager
             // 
+            this.groupBox_FolderManager.Controls.Add(this.button_BoxAccountInfo);
             this.groupBox_FolderManager.Controls.Add(this.statusStrip1);
             this.groupBox_FolderManager.Controls.Add(this.groupBox1);
             this.groupBox_FolderManager.Controls.Add(this.textBox_Prefix);
@@ -93,46 +93,34 @@
             // statusStrip1
             // 
             this.statusStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripStatusLabel1});
-            this.statusStrip1.Location = new System.Drawing.Point(3, 609);
+            this.statusStrip1.Location = new System.Drawing.Point(3, 612);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(894, 25);
+            this.statusStrip1.Size = new System.Drawing.Size(894, 22);
             this.statusStrip1.TabIndex = 9;
             this.statusStrip1.Text = "statusStrip1";
             // 
-            // toolStripStatusLabel1
-            // 
-            this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
-            this.toolStripStatusLabel1.Size = new System.Drawing.Size(512, 20);
-            this.toolStripStatusLabel1.Text = "https://github.com/box/box-windows-sdk-v2/tree/master/Box.V2/Managers";
-            this.toolStripStatusLabel1.DoubleClick += new System.EventHandler(this.toolStripStatusLabel1_DoubleClick);
-            // 
             // groupBox1
             // 
-            this.groupBox1.Controls.Add(this.richTextBox1);
+            this.groupBox1.Controls.Add(this.button_Validate);
+            this.groupBox1.Controls.Add(this.richTextBox_BoxNodes);
             this.groupBox1.Controls.Add(this.label_LocalFolderSelection);
             this.groupBox1.Controls.Add(this.button_LocalFolderSelection);
             this.groupBox1.Controls.Add(this.label_ClientJobBoxFolders);
             this.groupBox1.Controls.Add(this.button_CreateBoxFolders);
             this.groupBox1.Location = new System.Drawing.Point(9, 78);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(882, 339);
+            this.groupBox1.Size = new System.Drawing.Size(882, 314);
             this.groupBox1.TabIndex = 7;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Folder Structure";
             // 
-            // richTextBox1
+            // richTextBox_BoxNodes
             // 
-            this.richTextBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.richTextBox1.Location = new System.Drawing.Point(12, 43);
-            this.richTextBox1.Name = "richTextBox1";
-            this.richTextBox1.ReadOnly = true;
-            this.richTextBox1.Size = new System.Drawing.Size(864, 256);
-            this.richTextBox1.TabIndex = 10;
-            this.richTextBox1.Text = "";
+            this.richTextBox_BoxNodes.Location = new System.Drawing.Point(12, 43);
+            this.richTextBox_BoxNodes.Name = "richTextBox_BoxNodes";
+            this.richTextBox_BoxNodes.Size = new System.Drawing.Size(864, 234);
+            this.richTextBox_BoxNodes.TabIndex = 10;
+            this.richTextBox_BoxNodes.Text = "";
             // 
             // label_LocalFolderSelection
             // 
@@ -157,7 +145,7 @@
             // label_ClientJobBoxFolders
             // 
             this.label_ClientJobBoxFolders.AutoSize = true;
-            this.label_ClientJobBoxFolders.Location = new System.Drawing.Point(6, 311);
+            this.label_ClientJobBoxFolders.Location = new System.Drawing.Point(12, 286);
             this.label_ClientJobBoxFolders.Name = "label_ClientJobBoxFolders";
             this.label_ClientJobBoxFolders.Size = new System.Drawing.Size(249, 17);
             this.label_ClientJobBoxFolders.TabIndex = 7;
@@ -167,7 +155,7 @@
             // 
             this.button_CreateBoxFolders.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button_CreateBoxFolders.Enabled = false;
-            this.button_CreateBoxFolders.Location = new System.Drawing.Point(801, 305);
+            this.button_CreateBoxFolders.Location = new System.Drawing.Point(348, 283);
             this.button_CreateBoxFolders.Name = "button_CreateBoxFolders";
             this.button_CreateBoxFolders.Size = new System.Drawing.Size(75, 23);
             this.button_CreateBoxFolders.TabIndex = 6;
@@ -177,16 +165,16 @@
             // 
             // textBox_Prefix
             // 
-            this.textBox_Prefix.Location = new System.Drawing.Point(385, 12);
+            this.textBox_Prefix.Location = new System.Drawing.Point(512, 11);
             this.textBox_Prefix.Name = "textBox_Prefix";
             this.textBox_Prefix.ReadOnly = true;
-            this.textBox_Prefix.Size = new System.Drawing.Size(353, 22);
+            this.textBox_Prefix.Size = new System.Drawing.Size(251, 22);
             this.textBox_Prefix.TabIndex = 5;
             // 
             // label_BoxFolderPrefix
             // 
             this.label_BoxFolderPrefix.AutoSize = true;
-            this.label_BoxFolderPrefix.Location = new System.Drawing.Point(277, 14);
+            this.label_BoxFolderPrefix.Location = new System.Drawing.Point(405, 14);
             this.label_BoxFolderPrefix.Name = "label_BoxFolderPrefix";
             this.label_BoxFolderPrefix.Size = new System.Drawing.Size(101, 17);
             this.label_BoxFolderPrefix.TabIndex = 4;
@@ -245,7 +233,6 @@
             // 
             // panel1
             // 
-            this.panel1.Controls.Add(this.button_BoxAccountInfo);
             this.panel1.Controls.Add(this.button_GetToken);
             this.panel1.Controls.Add(this.textBox_AdminToken);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -257,7 +244,7 @@
             // button_BoxAccountInfo
             // 
             this.button_BoxAccountInfo.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_BoxAccountInfo.Location = new System.Drawing.Point(769, 3);
+            this.button_BoxAccountInfo.Location = new System.Drawing.Point(769, 11);
             this.button_BoxAccountInfo.Name = "button_BoxAccountInfo";
             this.button_BoxAccountInfo.Size = new System.Drawing.Size(122, 23);
             this.button_BoxAccountInfo.TabIndex = 7;
@@ -265,19 +252,27 @@
             this.button_BoxAccountInfo.UseVisualStyleBackColor = true;
             this.button_BoxAccountInfo.Click += new System.EventHandler(this.button_BoxAccountInfo_Click);
             // 
-            // Form1
+            // button_Validate
+            // 
+            this.button_Validate.Location = new System.Drawing.Point(267, 283);
+            this.button_Validate.Name = "button_Validate";
+            this.button_Validate.Size = new System.Drawing.Size(75, 23);
+            this.button_Validate.TabIndex = 11;
+            this.button_Validate.Text = "Validate";
+            this.button_Validate.UseVisualStyleBackColor = true;
+            this.button_Validate.Click += new System.EventHandler(this.button_Validate_Click);
+            // 
+            // Form_FolderManager
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(906, 683);
             this.Controls.Add(this.tableLayoutPanel1);
-            this.Name = "Form1";
+            this.Name = "Form_FolderManager";
             this.Text = "Folder Manager";
             this.Load += new System.EventHandler(this.Form1_Load);
             this.groupBox_FolderManager.ResumeLayout(false);
             this.groupBox_FolderManager.PerformLayout();
-            this.statusStrip1.ResumeLayout(false);
-            this.statusStrip1.PerformLayout();
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             this.tableLayoutPanel1.ResumeLayout(false);
@@ -305,10 +300,10 @@
         private System.Windows.Forms.Label label_ClientJobBoxFolders;
         private System.Windows.Forms.Button button_CreateBoxFolders;
         private System.Windows.Forms.StatusStrip statusStrip1;
-        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;
-        private System.Windows.Forms.RichTextBox richTextBox1;
         private System.Windows.Forms.Label label_LocalFolderSelection;
         private System.Windows.Forms.Button button_LocalFolderSelection;
+        private System.Windows.Forms.RichTextBox richTextBox_BoxNodes;
+        private System.Windows.Forms.Button button_Validate;
     }
 }
 
