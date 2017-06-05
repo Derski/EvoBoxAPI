@@ -58,43 +58,79 @@ namespace EvoBoxAPI
         #endregion Constructor
 
         #region Folder Structure Create
-        public List<EvoBoxFolder> CreateNewBoxFolderStructure
-            (EvoBoxFolder localFolder,
-            string clientId,
-            string jobId
-            )
+        public void CreateNewBoxFolderStructure
+            (EvoBoxFolder localFolder, string clientId, string jobId)
         {
-            BoxFolder clientRootFolder = BoxFolderCreate(clientId, "0", boxClient);
-            if(clientRootFolder != null)
+            var clientJobIdFolder =
+                        BoxFolderStructure.GetBoxClientJobIdRootFolderName(clientId, jobId);
+            var clientJobIdPrefix =
+                            BoxFolderStructure.GetBoxClientJobIdPrefix(clientId, jobId);
+
+
+            if (localFolder.BoxId == null || localFolder.BoxId=="0")
             {
-                BoxFolder jobRootFolder = BoxFolderCreate(clientId + "_" + jobId, clientRootFolder.Id, boxClient);
-                if(jobRootFolder != null)
+                BoxFolder clientRootFolder = BoxFolderCreate(clientId, "0", boxClient);
+                if (clientRootFolder != null)
                 {
-                    CreateFolderHierarchy(localFolder, jobRootFolder.Id,clientId,jobId);  
+                    localFolder.BoxId = clientRootFolder.Id;
+                    localFolder.BoxParentId = "0";
+                    var jobIdFolder =  localFolder.ChildFolders[0];
+                    BoxFolder jobRootFolder = BoxFolderCreate(clientJobIdFolder, clientRootFolder.Id, boxClient);
+                    if (jobRootFolder != null)
+                    {
+                        jobIdFolder.BoxId = jobRootFolder.Id;
+                        jobIdFolder.BoxParentId = clientRootFolder.Id;
+                        CreateFolderHierarchy(jobIdFolder, jobRootFolder.Id, clientJobIdPrefix);
+                    }
                 }
             }
-
-            return null;
+            else
+            {
+                var jobIdFolder = localFolder.ChildFolders[0];
+                //root already exists, see if job if exists
+                if (jobIdFolder.BoxId == null)
+                {
+                    BoxFolder jobRootFolder = BoxFolderCreate(clientJobIdFolder, localFolder.BoxId, boxClient);
+                    if (jobRootFolder != null)
+                    {
+                        CreateFolderHierarchy(jobIdFolder, jobRootFolder.Id, clientJobIdPrefix);
+                    }
+                }
+                else
+                {
+                    //Client Job Id Folder already exists 
+                    CreateFolderHierarchy(jobIdFolder, jobIdFolder.BoxId, clientJobIdPrefix);
+                }
+            }
         }
 
         private void CreateFolderHierarchy
             (EvoBoxFolder currentFolder,
             string parentFolderId,
-            string clientId,
-            string jobId)
+            string clientJobIdPrefix)
         {
-            
-            BoxFolder currentBoxFolder = 
-            BoxFolderCreate(clientId + "_" + jobId + "_" + currentFolder.FolderName, parentFolderId, boxClient);
-            if(currentBoxFolder != null)
+            if(currentFolder.BoxId == null)
             {
-                currentFolder.BoxId = currentBoxFolder.Id;
-                currentFolder.BoxParentId = parentFolderId;
-                foreach(var childFolder in currentFolder.ChildFolders)
+                BoxFolder currentBoxFolder =
+                    BoxFolderCreate(clientJobIdPrefix + currentFolder.FolderName, parentFolderId, boxClient);
+                if (currentBoxFolder != null)
                 {
-                    CreateFolderHierarchy(childFolder, currentBoxFolder.Id,clientId,jobId);
+                    currentFolder.BoxId = currentBoxFolder.Id;
+                    currentFolder.BoxParentId = parentFolderId;
+                    foreach (var childFolder in currentFolder.ChildFolders)
+                    {
+                        CreateFolderHierarchy(childFolder, currentBoxFolder.Id, clientJobIdPrefix);
+                    }
                 }
             }
+            else
+            {
+                foreach (var childFolder in currentFolder.ChildFolders)
+                {
+                    CreateFolderHierarchy(childFolder, currentFolder.BoxId, clientJobIdPrefix);
+                }
+            }
+
         }
 
         private static BoxFolder BoxFolderCreate(string folderName, string parentFolderId, BoxClient client)
@@ -136,15 +172,61 @@ namespace EvoBoxAPI
             return null;
         }
 
+        /// <summary>
+        /// LocalFolders start with Client and JobId Prefix
+        /// </summary>
+        /// <param name="localFolders"></param>
+        public void FindFromClientRootAndPopulateBoxAttributes(EvoBoxFolder localFolder)
+        {
+            var ClientRootFolder = localFolder;
+            BoxItem boxClientRoot =  FindRootClientFolder(ClientRootFolder.FolderName);           
+
+            if(boxClientRoot != null)
+            {
+                localFolder.BoxId = boxClientRoot.Id;
+                localFolder.BoxParentId = "0";
+
+                var items = EvoBoxService.GetAdminClient().FoldersManager.GetFolderItemsAsync(boxClientRoot.Id,10).Result;
+                var ClientJobIdRootFolder = ClientRootFolder.ChildFolders[0];
+                BoxItem boxClientJobIdRoot = 
+                items.Entries.SingleOrDefault(i => i.Name == ClientJobIdRootFolder.FolderName);
+                if(boxClientJobIdRoot != null)
+                {
+                    ClientJobIdRootFolder.BoxId = boxClientJobIdRoot.Id;
+                    ClientJobIdRootFolder.BoxParentId = boxClientRoot.Id;
+                    loopthroughkids(boxClientJobIdRoot, ClientJobIdRootFolder, ClientJobIdRootFolder.FolderName+"_");
+                }
+            }
+        }
+       
+        private void loopthroughkids(BoxItem boxitem, EvoBoxFolder localFolder, string clientJobPrefix)
+        {
+            var boxitems = EvoBoxService.GetAdminClient().FoldersManager.GetFolderItemsAsync(boxitem.Id,200);
+            var localfolders = localFolder.ChildFolders;
+            foreach(var childboxitem in boxitems.Result.Entries)
+            {
+                var match = 
+                localfolders.SingleOrDefault
+                (l => l.FolderName == childboxitem.Name.Replace(clientJobPrefix,""));
+                if(match != null)
+                {
+                    match.BoxFolderName = childboxitem.Name;
+                    match.BoxId = childboxitem.Id;
+                    match.BoxParentId = boxitem.Id;
+                    loopthroughkids(childboxitem, match, clientJobPrefix);
+                }
+            }
+        }
+
         #endregion
 
         #region Map Local Folders to Box Folders on Box Folder IDs
-        public void GetBoxFolderIdsForFileFolders(List<EvoBoxFolder> localFolders, string clientJobPrefix)
+        public void GetBoxFolderIdsForFileFolders(EvoBoxFolder localFolder, string clientJobPrefix)
         {
             Task<BoxCollection<BoxItem>> task = EvoBoxService.FindFoldersByKeyword(clientJobPrefix, boxClient);
             var awaiter = task.GetAwaiter();
             //awaiter.OnCompleted(() => OnFindFolderComplete(awaiter.GetResult()));
-            var flattened = Flatten(localFolders);
+            var flattened = localFolder.Flatten(x=>x.ChildFolders);
             foreach (BoxItem boxFolder in awaiter.GetResult().Entries)
             {
                 string fileName =  boxFolder.Name.Replace(clientJobPrefix, "");
@@ -166,23 +248,12 @@ namespace EvoBoxAPI
             }
         }
 
-        private List<EvoBoxFolder> Flatten(List<EvoBoxFolder> folderHierarchy )
-        {
-            //test it
-            List<EvoBoxFolder> flattened = new List<EvoBoxFolder>();
-            foreach (var folder in folderHierarchy)
-            {
-                flattened.AddRange(folder.Flatten(x => x.ChildFolders));
-            }
-            return flattened;
-        }
         #endregion Map Local Folders to Box Folders on Box Folder IDs
 
         #region Read in All the Files in the folder
-        public void ReadInFolderFiles(List<EvoBoxFolder> folders)
+        public void ReadInFolderFiles(EvoBoxFolder rootFolder)
         {
-            var flattened = Flatten(folders);
-            foreach(var folder in flattened)
+            foreach(var folder in rootFolder.Flatten(x => x.ChildFolders))
             {
                 ReadFilesPerFolder(folder);
             }
@@ -191,10 +262,17 @@ namespace EvoBoxAPI
         {
             if(Directory.Exists(folder.FullPath))
             {
+                //FILTER
+                var fileExtentions = folder.FileFilter.Replace("*.", ".").Split('|').ToList();
+
                 DirectoryInfo directoryInfo = new DirectoryInfo(folder.FullPath);
                 foreach(var fileInfo in directoryInfo.GetFiles())
                 {
-                    folder.FileNames.Add(fileInfo.FullName);
+                    var extension = fileInfo.Extension;
+                    if(fileExtentions.Contains(extension) || fileExtentions.Contains(".*"))
+                    {
+                        folder.FileNames.Add(fileInfo.FullName);
+                    }
                 }
             }
         }
@@ -202,16 +280,15 @@ namespace EvoBoxAPI
 
         #region Upload Files
 
-        public void UploadAllFiles(List<EvoBoxFolder> folders)
+        public void UploadAllFiles(EvoBoxFolder rootFolder)
         {
-            var flattened =  Flatten(folders);
+            var flattened = rootFolder.Flatten(x=>x.ChildFolders);
             foreach(var folder in flattened)
             {
                 foreach( string file in folder.FileNames)
                 {
                     EvoBoxService.ExecuteMainAsyncFileUpload(file, folder.BoxId, boxClient);
                 }
-                //
             }
         }
 

@@ -11,6 +11,8 @@ namespace EvoBoxAPI
         public string BoxId { get; set; }
         public string FolderName { get; set; }
 
+        public string FileFilter { get; set; }
+
         //ClientJobPrefix_FolderName
         public string BoxFolderName { get; set; }
 
@@ -61,15 +63,16 @@ namespace EvoBoxAPI
             BoxParentId = boxParentId;
         }
 
-        public EvoBoxFolder(string fullPath, string folderName, bool isChecked)
+        public EvoBoxFolder(string fullPath, string folderName, bool isChecked, string fileFilter)
         {
             FolderName = folderName;
             FullPath = fullPath;
             Checked = isChecked;
+            FileFilter = fileFilter;
         }
         public EvoBoxFolder(string folderName)
         {
-            FolderName = FolderName;
+            FolderName = folderName;
         }
         #endregion
     }

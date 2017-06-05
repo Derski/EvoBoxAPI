@@ -90,9 +90,8 @@ namespace WinForms_BoxApi_Tester
             {
                 EvoBoxFolder  = BoxFolderStructure.CreateLocalEvoBoxFolderStructure
                     (folderSelector.SelectedNodes,textBox_ClientId.Text,textBox_JobId.Text);
-                richTextBox_BoxNodes.Text +=
-                        string.Join("\n", EvoBoxFolder.Flatten(x => x.ChildFolders).Select(n => n.FullPath))+"\n";
-                
+                richTextBox_BoxNodes.Text =
+                        string.Join("\n", EvoBoxFolder.Flatten(x => x.ChildFolders).Select(n => n.FolderName))+"\n";  
             }
         }
         
@@ -105,10 +104,13 @@ namespace WinForms_BoxApi_Tester
         }
         private void CreateBoxFolders()
         {
+            folderManager.FindFromClientRootAndPopulateBoxAttributes(EvoBoxFolder);
+
             folderManager.CreateNewBoxFolderStructure
                 (EvoBoxFolder,
                 textBox_ClientId.Text,
                 textBox_JobId.Text);
+            button_UploadFiles.Enabled = true;
         }
         #endregion
 
@@ -123,7 +125,6 @@ namespace WinForms_BoxApi_Tester
             }
             else
             {
-                ValidateWithBox();
                 button_CreateBoxFolders.Enabled = true;
             }
         }
@@ -164,18 +165,11 @@ namespace WinForms_BoxApi_Tester
             }
             return null;
         }
-        private void ValidateWithBox()
+
+        private void button_UploadFiles_Click(object sender, EventArgs e)
         {
-            var clientId = textBox_ClientId.Text;
-            BoxItem  clientBoxItem = folderManager.FindRootClientFolder(clientId);
-            BoxItem clientJobIdBoxItem;
-            if(clientBoxItem != null)
-            {
-                clientJobIdBoxItem =
-                folderManager.FindRootJobIdFolder(clientBoxItem.Id, ClientJobPrefix);
-
-            }
+            folderManager.ReadInFolderFiles(EvoBoxFolder);
+            folderManager.UploadAllFiles(EvoBoxFolder);
         }
-
     }
 }

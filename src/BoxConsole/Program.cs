@@ -38,7 +38,7 @@ namespace BoxConsole
             //var foldersList = folderManager.CreateNewBoxFolderStructure(testFolders);
 
             folderManager.GetBoxFolderIdsForFileFolders(testFolders);
-            //TODO SAVE Folder MAPPING to PERMANENT STORAGE
+
 
             folderManager.ReadInFolderFiles(testFolders);
 

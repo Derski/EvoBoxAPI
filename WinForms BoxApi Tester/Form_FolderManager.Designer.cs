@@ -48,6 +48,7 @@
             this.panel1 = new System.Windows.Forms.Panel();
             this.button_BoxAccountInfo = new System.Windows.Forms.Button();
             this.button_Validate = new System.Windows.Forms.Button();
+            this.button_UploadFiles = new System.Windows.Forms.Button();
             this.groupBox_FolderManager.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
@@ -101,6 +102,7 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.button_UploadFiles);
             this.groupBox1.Controls.Add(this.button_Validate);
             this.groupBox1.Controls.Add(this.richTextBox_BoxNodes);
             this.groupBox1.Controls.Add(this.label_LocalFolderSelection);
@@ -157,9 +159,9 @@
             this.button_CreateBoxFolders.Enabled = false;
             this.button_CreateBoxFolders.Location = new System.Drawing.Point(348, 283);
             this.button_CreateBoxFolders.Name = "button_CreateBoxFolders";
-            this.button_CreateBoxFolders.Size = new System.Drawing.Size(75, 23);
+            this.button_CreateBoxFolders.Size = new System.Drawing.Size(112, 23);
             this.button_CreateBoxFolders.TabIndex = 6;
-            this.button_CreateBoxFolders.Text = "Create";
+            this.button_CreateBoxFolders.Text = "Create Folders";
             this.button_CreateBoxFolders.UseVisualStyleBackColor = true;
             this.button_CreateBoxFolders.Click += new System.EventHandler(this.button_CreateBoxFolders_Click);
             // 
@@ -262,6 +264,17 @@
             this.button_Validate.UseVisualStyleBackColor = true;
             this.button_Validate.Click += new System.EventHandler(this.button_Validate_Click);
             // 
+            // button_UploadFiles
+            // 
+            this.button_UploadFiles.Enabled = false;
+            this.button_UploadFiles.Location = new System.Drawing.Point(466, 283);
+            this.button_UploadFiles.Name = "button_UploadFiles";
+            this.button_UploadFiles.Size = new System.Drawing.Size(101, 23);
+            this.button_UploadFiles.TabIndex = 12;
+            this.button_UploadFiles.Text = "Upload Files";
+            this.button_UploadFiles.UseVisualStyleBackColor = true;
+            this.button_UploadFiles.Click += new System.EventHandler(this.button_UploadFiles_Click);
+            // 
             // Form_FolderManager
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -304,6 +317,7 @@
         private System.Windows.Forms.Button button_LocalFolderSelection;
         private System.Windows.Forms.RichTextBox richTextBox_BoxNodes;
         private System.Windows.Forms.Button button_Validate;
+        private System.Windows.Forms.Button button_UploadFiles;
     }
 }
 
