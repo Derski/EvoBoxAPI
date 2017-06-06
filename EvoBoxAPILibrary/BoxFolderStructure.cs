@@ -33,7 +33,7 @@ namespace EvoBoxAPI
                 }
             }
             //create jobId Folder and Client Folder
-            string jobIdPrefix = clientId + "_" + jobId;
+            string jobIdPrefix = GetBoxClientJobIdRootFolderName( clientId, jobId);
 
             EvoBoxFolder ClientJobPrefixFolder = new EvoBoxFolder(jobIdPrefix);
             ClientJobPrefixFolder.ChildFolders.AddRange(evoBoxFolders);
