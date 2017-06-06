@@ -8,8 +8,8 @@ namespace EvoBoxAPI
 {
     public interface IClientJobInfo
     {
-        string GetClientName { get; }
+        List<string> GetClientList();
 
-        string GetJobId { get; }
+        List<string> GetJobListPerClient(string ClientId);
     }
 }

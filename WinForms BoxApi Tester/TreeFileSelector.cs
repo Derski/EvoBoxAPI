@@ -44,39 +44,48 @@ namespace FileFolderSelector
                         _currentSelectedNode = value;
                         OnNodeChanged(new NodeChangedEventArgs(_currentSelectedNode));
                     } 
-                
             }
         }
 
         #region Hide / Show Files on Node
         internal void DisplayFilesInSelectedNode()
         {
-            var path = CurrentSelectedNode.FullPath;
-            DirectoryInfo info = new DirectoryInfo(path);
-            foreach( FileInfo fileInfo in info.EnumerateFiles())
+            if (CurrentSelectedNode != null && !string.IsNullOrEmpty(CurrentSelectedNode.FullPath))
             {
-                CurrentSelectedNode.Nodes.Add(fileInfo.Name);
+                var path = CurrentSelectedNode.FullPath;
+
+                //Don't do anything if a file
+                if (Path.HasExtension(path)) return;
+
+                DirectoryInfo info = new DirectoryInfo(path);
+                foreach (FileInfo fileInfo in info.EnumerateFiles())
+                {
+                    CurrentSelectedNode.Nodes.Add(fileInfo.Name);
+                }
+            }
+            else
+            {
+                
             }
         }
 
         internal void RemoveFilesFromSelectedNode()
         {
-            List<TreeNode> targetedForRemoval = new List<TreeNode>();
-            foreach(TreeNode node in CurrentSelectedNode.Nodes)
+            if(CurrentSelectedNode!= null)
             {
-                if(node.Tag==null)
+                List<TreeNode> targetedForRemoval = new List<TreeNode>();
+                foreach (TreeNode node in CurrentSelectedNode.Nodes)
                 {
-                    targetedForRemoval.Add(node);
+                    if (node.Tag == null)
+                    {
+                        targetedForRemoval.Add(node);
+                    }
                 }
-            }
-            foreach(TreeNode node in targetedForRemoval)
-            {
-                this.Nodes.Remove(node);
-            }
-            
-
-            //CurrentSelectedNode.Nodes.Clear();
-            
+                foreach (TreeNode node in targetedForRemoval)
+                {
+                    this.Nodes.Remove(node);
+                }
+            }   
         }
         #endregion
 

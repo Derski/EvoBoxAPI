@@ -8,27 +8,18 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Extensions;
+using EvoBoxAPILibrary;
 
 namespace EvoBoxAPI
 {
-    public class FolderManager
+    public class FolderManager:IFolderManager
     {
-
-        public bool TokenValid
-        {
-            get
-            {
-                bool valid = false;
-
-                return valid;
-            }
-        }
 
         public string AdminToken
         {
             get
             {
-                if(boxClient==null)
+                if(_boxClient==null)
                 {
                     return "Not Currently Authenticaten";
                 }
@@ -36,7 +27,7 @@ namespace EvoBoxAPI
                 {
                     try
                     {
-                        return boxClient.Auth.Session.AccessToken;
+                        return _boxClient.Auth.Session.AccessToken;
                     }
                     catch(Exception ex)
                     {
@@ -47,13 +38,13 @@ namespace EvoBoxAPI
             }
         }
 
-        BoxClient boxClient;
+        private BoxClient _boxClient;
 
         #region Constructor
         //Constructor
-        public FolderManager()
+        public FolderManager(BoxClient boxClient)
         {
-            boxClient = EvoBoxAPI.EvoBoxService.GetAdminClient();
+            _boxClient = boxClient;
         }
         #endregion Constructor
 
@@ -69,13 +60,13 @@ namespace EvoBoxAPI
 
             if (localFolder.BoxId == null || localFolder.BoxId=="0")
             {
-                BoxFolder clientRootFolder = BoxFolderCreate(clientId, "0", boxClient);
+                BoxFolder clientRootFolder = BoxFolderCreate(clientId, "0", _boxClient);
                 if (clientRootFolder != null)
                 {
                     localFolder.BoxId = clientRootFolder.Id;
                     localFolder.BoxParentId = "0";
                     var jobIdFolder =  localFolder.ChildFolders[0];
-                    BoxFolder jobRootFolder = BoxFolderCreate(clientJobIdFolder, clientRootFolder.Id, boxClient);
+                    BoxFolder jobRootFolder = BoxFolderCreate(clientJobIdFolder, clientRootFolder.Id, _boxClient);
                     if (jobRootFolder != null)
                     {
                         jobIdFolder.BoxId = jobRootFolder.Id;
@@ -90,9 +81,11 @@ namespace EvoBoxAPI
                 //root already exists, see if job if exists
                 if (jobIdFolder.BoxId == null)
                 {
-                    BoxFolder jobRootFolder = BoxFolderCreate(clientJobIdFolder, localFolder.BoxId, boxClient);
+                    BoxFolder jobRootFolder = BoxFolderCreate(clientJobIdFolder, localFolder.BoxId, _boxClient);
                     if (jobRootFolder != null)
                     {
+                        jobIdFolder.BoxId = jobRootFolder.Id;
+                        jobIdFolder.BoxParentId = jobRootFolder.Parent.Id;
                         CreateFolderHierarchy(jobIdFolder, jobRootFolder.Id, clientJobIdPrefix);
                     }
                 }
@@ -112,7 +105,7 @@ namespace EvoBoxAPI
             if(currentFolder.BoxId == null)
             {
                 BoxFolder currentBoxFolder =
-                    BoxFolderCreate(clientJobIdPrefix + currentFolder.FolderName, parentFolderId, boxClient);
+                    BoxFolderCreate(clientJobIdPrefix + currentFolder.FolderName, parentFolderId, _boxClient);
                 if (currentBoxFolder != null)
                 {
                     currentFolder.BoxId = currentBoxFolder.Id;
@@ -146,7 +139,7 @@ namespace EvoBoxAPI
 
         public BoxItem FindRootClientFolder(string clientId)
         {
-            Task<BoxCollection<BoxItem>> task = EvoBoxService.FindFoldersByKeyword(clientId, boxClient);
+            Task<BoxCollection<BoxItem>> task = EvoBoxService.FindFoldersByKeyword(clientId, _boxClient);
             var awaiter = task.GetAwaiter();
             foreach (BoxItem boxFolder in awaiter.GetResult().Entries)
             {
@@ -160,7 +153,7 @@ namespace EvoBoxAPI
 
         public BoxItem FindRootJobIdFolder(string parentId, string clientJobPrefix)
         {
-            Task<BoxCollection<BoxItem>> task = EvoBoxService.FindFoldersByKeyword(clientJobPrefix, boxClient);
+            Task<BoxCollection<BoxItem>> task = EvoBoxService.FindFoldersByKeyword(clientJobPrefix, _boxClient);
             var awaiter = task.GetAwaiter();
             foreach (BoxItem boxFolder in awaiter.GetResult().Entries)
             {
@@ -223,7 +216,7 @@ namespace EvoBoxAPI
         #region Map Local Folders to Box Folders on Box Folder IDs
         public void GetBoxFolderIdsForFileFolders(EvoBoxFolder localFolder, string clientJobPrefix)
         {
-            Task<BoxCollection<BoxItem>> task = EvoBoxService.FindFoldersByKeyword(clientJobPrefix, boxClient);
+            Task<BoxCollection<BoxItem>> task = EvoBoxService.FindFoldersByKeyword(clientJobPrefix, _boxClient);
             var awaiter = task.GetAwaiter();
             //awaiter.OnCompleted(() => OnFindFolderComplete(awaiter.GetResult()));
             var flattened = localFolder.Flatten(x=>x.ChildFolders);
@@ -271,7 +264,7 @@ namespace EvoBoxAPI
                     var extension = fileInfo.Extension;
                     if(fileExtentions.Contains(extension) || fileExtentions.Contains(".*"))
                     {
-                        folder.FileNames.Add(fileInfo.FullName);
+                        folder.FileNames.Add(new EvoBoxFile(fileInfo.FullName));
                     }
                 }
             }
@@ -282,19 +275,31 @@ namespace EvoBoxAPI
 
         public void UploadAllFiles(EvoBoxFolder rootFolder)
         {
-            var flattened = rootFolder.Flatten(x=>x.ChildFolders);
-            foreach(var folder in flattened)
+            foreach(var folder in rootFolder.Flatten(x => x.ChildFolders))
             {
-                foreach( string file in folder.FileNames)
+                foreach( string file in folder.FileNames.Select(f=>f.FullLocalName))
                 {
-                    EvoBoxService.ExecuteMainAsyncFileUpload(file, folder.BoxId, boxClient);
+                    var task = EvoBoxService.ExecuteMainAsyncFileUpload(file, folder.BoxId, _boxClient);
+                    var awaiter = task.GetAwaiter();
+                    try
+                    {
+                        awaiter.OnCompleted(() => OnFileUploadAsyncComplete(awaiter.GetResult()));
+                    }
+                    catch (Exception ex)
+                    {
+                        throw;
+                    }
                 }
             }
         }
 
         #endregion
 
-        #region Testing only
+        #region Returning from Async Events
+        private static void OnFileUploadAsyncComplete(BoxFile file)
+        {
+
+        }
         private static void OnFindFolderComplete(BoxCollection<BoxItem> foldersCollection)
         {
 
@@ -304,7 +309,7 @@ namespace EvoBoxAPI
         {
 
         }
-        #endregion Testing Only
+        #endregion Returning from Async Events
     }
 
 

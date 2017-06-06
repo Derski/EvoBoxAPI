@@ -38,14 +38,14 @@ namespace EvoBoxAPI
             }
         }
 
-        private List<string> _fileNames;
-        public List<string> FileNames
+        private List<EvoBoxFile> _fileNames;
+        public List<EvoBoxFile> FileNames
         {
             get
             {
                 if(_fileNames == null)
                 {
-                    _fileNames = new List<string>();
+                    _fileNames = new List<EvoBoxFile>();
                 }
                 return _fileNames;
             }

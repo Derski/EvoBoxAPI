@@ -70,7 +70,7 @@ namespace FileFolderSelector
                 if (treeFileSelector.SelectedNode == null ||
                     treeFileSelector.SelectedNode.Tag == null)
                 {
-                    MessageBox.Show("Please Select a valid Directory Node to set filter");
+                    ShowSelectValidDirectoryMessage();
                 }
                 else
                 {
@@ -85,6 +85,12 @@ namespace FileFolderSelector
             }
         }
         #endregion Node Custom Properties
+
+        private void ShowSelectValidDirectoryMessage()
+        {
+            MessageBox.Show("Please Select a valid Directory Node to set filter");
+        }
+
 
         #region Clear
         private void button_Clear_Click(object sender, EventArgs e)
@@ -184,23 +190,30 @@ namespace FileFolderSelector
         #region Show / hide Files on Selected Folder Node
         private void button_ShowNodeFiles_Click(object sender, EventArgs e)
         {
-            ShowFilesOnSelectedFolderNode();
+            if (treeFileSelector.SelectedNode == null)
+            {
+                ShowSelectValidDirectoryMessage();
+            }
+            else
+            {
+                treeFileSelector.RemoveFilesFromSelectedNode(); 
+                treeFileSelector.DisplayFilesInSelectedNode();
+            }
+           
         }
-        private void ShowFilesOnSelectedFolderNode()
-        {
-            treeFileSelector.DisplayFilesInSelectedNode();
-        }
+  
         private void button_HideNodeFiles_Click(object sender, EventArgs e)
         {
-            HideFilesOnSelectedFolder();
+            if (treeFileSelector.SelectedNode == null)
+            {
+                ShowSelectValidDirectoryMessage();
+            }
+            else
+            {
+                treeFileSelector.RemoveFilesFromSelectedNode();
+            }
         }
-
-        private void HideFilesOnSelectedFolder()
-        {
-            treeFileSelector.RemoveFilesFromSelectedNode();
-        }
-
-
+        
         #endregion
 
         private void textBox_SelectedNodeFilter_Validating(object sender, CancelEventArgs e)

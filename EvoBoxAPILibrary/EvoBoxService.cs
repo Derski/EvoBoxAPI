@@ -98,17 +98,30 @@ namespace EvoBoxAPI
         }
         public static async Task<BoxFile> ExecuteMainAsyncFileUpload(string localFilePath,string parentFolderId, BoxClient client)
         {
-            var file = File.OpenRead(localFilePath);
-            var fileName =  Path.GetFileName(localFilePath);
+            var filestream = File.OpenRead(localFilePath);
+            string fileName =  Path.GetFileName(localFilePath);
+
             var fileRequest = new BoxFileRequest
             {
                 Name = fileName,
-                Parent = new BoxFolderRequest { Id = parentFolderId }
+                Parent = new BoxFolderRequest { Id = parentFolderId },
             };
+            try
+            {
+                var bFile = await client.FilesManager.UploadAsync(fileRequest, filestream);
+                return bFile;
+            }
+            catch (Box.V2.Exceptions.BoxPreflightCheckConflictException<Box.V2.Models.BoxFile> ex)
+            {
+                BoxFile conflictingItem = ex.ConflictingItem;
+                var sha1 =  conflictingItem.Sha1;
+                var fileId = conflictingItem.Id;
+                var conflictingFileName = conflictingItem.Name;
+                var type = conflictingItem.Type;
 
-            var bFile = await client.FilesManager.UploadAsync(fileRequest, file);
-
-            return bFile;
+                throw;
+            }
+            
            
         }
 

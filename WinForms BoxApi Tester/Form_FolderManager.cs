@@ -12,42 +12,29 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Extensions;
 using Box.V2.Models;
+using EvoBoxAPILibrary;
+using Box.V2;
 
 namespace WinForms_BoxApi_Tester
 {
     public partial class Form_FolderManager : Form
     {
         FolderManager folderManager;
-        public string ClientJobPrefix
-        {
-            get
-            {
-                return textBox_ClientId.Text + "_" + textBox_JobId.Text;
-            }
-        }
+
        public EvoBoxFolder EvoBoxFolder { get; set; }
 
         public Form_FolderManager()
         {
             InitializeComponent();
+            BoxClient boxClient =  EvoBoxAPI.EvoBoxService.GetAdminClient();
+            folderManager = new FolderManager(boxClient);
+            textBox_AdminToken.Text = folderManager.AdminToken;
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            InitializeDefaults();
         }
 
-        private void InitializeDefaults()
-        {
-            UpdatePrefix();
-        }
-
-        private void button_GetToken_Click(object sender, EventArgs e)
-        {
-            folderManager = new FolderManager();
-            textBox_AdminToken.Text = folderManager.AdminToken;
-            groupBox_FolderManager.Enabled = true;
-        }
 
         #region Show Box Account Login Info
         private void button_BoxAccountInfo_Click(object sender, EventArgs e)
@@ -64,17 +51,14 @@ namespace WinForms_BoxApi_Tester
         #region Client Id and Job Prefix
         private void textBox_ClientId_TextChanged(object sender, EventArgs e)
         {
-            UpdatePrefix();
+           
         }
 
         private void textBox_JobId_TextChanged(object sender, EventArgs e)
         {
-            UpdatePrefix();
+           
         }
-        private void UpdatePrefix()
-        {
-            textBox_Prefix.Text = textBox_ClientId.Text + "_" + textBox_JobId.Text + "_";
-        }
+
         #endregion Client Id and Job Prefix
 
         #region Select Local Folders
@@ -90,11 +74,53 @@ namespace WinForms_BoxApi_Tester
             {
                 EvoBoxFolder  = BoxFolderStructure.CreateLocalEvoBoxFolderStructure
                     (folderSelector.SelectedNodes,textBox_ClientId.Text,textBox_JobId.Text);
-                richTextBox_BoxNodes.Text =
-                        string.Join("\n", EvoBoxFolder.Flatten(x => x.ChildFolders).Select(n => n.FolderName))+"\n";  
+                richTextBox_BoxNodes.Clear();
+                IndentPrintFolders(EvoBoxFolder,"",richTextBox_BoxNodes,false); 
             }
         }
         
+        private void FolderInfoDisplayLogic(EvoBoxFolder folder, string tab, RichTextBox richTextBox)
+        {
+            //Display information logic
+            if (folder.BoxId != null)
+            {
+                richTextBox.AppendText((tab + folder.FolderName), Color.Green);
+               
+            }
+            else
+            {
+                richTextBox.AppendText((tab + folder.FolderName), Color.Red);
+            }
+        }
+
+        private void IndentPrintFolders(EvoBoxFolder folder, 
+            string tab, 
+            RichTextBox richTextBox, 
+            bool displayBoxInfo
+            )
+        {
+            if(displayBoxInfo)
+            {
+                FolderInfoDisplayLogic(folder, tab,richTextBox);
+            }
+            else
+            {
+                richTextBox.AppendText((tab + folder.FolderName));
+            }
+            if(folder.FileFilter != null)
+            {
+                richTextBox.AppendText(" (" + folder.FileFilter + ") ");
+            }
+            
+
+            //indent children
+            richTextBox.AppendText(Environment.NewLine);
+            tab += "   ";
+            foreach(var childFolder in folder.ChildFolders)
+            {
+                IndentPrintFolders(childFolder, tab, richTextBox, displayBoxInfo);
+            }
+        }
         #endregion
 
         #region Create Box Folders
@@ -104,20 +130,25 @@ namespace WinForms_BoxApi_Tester
         }
         private void CreateBoxFolders()
         {
-            folderManager.FindFromClientRootAndPopulateBoxAttributes(EvoBoxFolder);
-
             folderManager.CreateNewBoxFolderStructure
                 (EvoBoxFolder,
                 textBox_ClientId.Text,
                 textBox_JobId.Text);
             button_UploadFiles.Enabled = true;
+            ValidatePrerequisites();
         }
         #endregion
 
+        #region Validate
         private void button_Validate_Click(object sender, EventArgs e)
         {
+            ValidatePrerequisites();
+        }
+
+        private void ValidatePrerequisites()
+        {
             var Errors = ValidateBeforeBoxAction();
-            if(Errors!= null)
+            if (Errors != null)
             {
                 button_CreateBoxFolders.Enabled = false;
                 var userErrors = string.Join("\n", Errors.ToArray());
@@ -125,10 +156,12 @@ namespace WinForms_BoxApi_Tester
             }
             else
             {
+                folderManager.FindFromClientRootAndPopulateBoxAttributes(EvoBoxFolder);
+                richTextBox_BoxNodes.Clear();
+                IndentPrintFolders(EvoBoxFolder, "", richTextBox_BoxNodes, true);
                 button_CreateBoxFolders.Enabled = true;
             }
         }
-
 
         private List<string> ValidateBeforeBoxAction()
         {
@@ -144,32 +177,72 @@ namespace WinForms_BoxApi_Tester
             else
             {
                 List<string> Errors = new List<string>();
-                Errors.Add("Please fix the following issues before attempting to create the box folder structure.\n");
+                Errors.Add("Please fix the following issues before attempting to create the box folder structure.");
                 if (!adminToken)
                 {
-                    Errors.Add("Please get An Admin Token.");
+                    Errors.Add("Get An Admin Token.");
                 }
                 if (!clientId)
                 {
-                    Errors.Add("Please set the Client Id");
+                    Errors.Add("Set the Client Id.");
                 }
                 if (!jobId)
                 {
-                    Errors.Add("Please set the Job Id.");
+                    Errors.Add("Set the Job Id.");
                 }
                 if (!boxFolders)
                 {
-                    Errors.Add("Please select folders to be created in the box account");
+                    Errors.Add("Select folders to be created in the box account.");
                 }
                 return Errors;
             }
             return null;
         }
 
+        #endregion Validate
+
+        #region Upload Files
         private void button_UploadFiles_Click(object sender, EventArgs e)
         {
             folderManager.ReadInFolderFiles(EvoBoxFolder);
             folderManager.UploadAllFiles(EvoBoxFolder);
         }
+        #endregion
+
+        #region Client Job Info Interface
+        private void button_GetClientJobInfo_Click(object sender, EventArgs e)
+        {
+            GetClientJobInfo();
+        }
+        private void GetClientJobInfo()
+        {
+            IClientJobInfo clientJobInfo = new ClientJobInfoStub();
+            Form_ClientJobInfo clientInfoForm =  new Form_ClientJobInfo(clientJobInfo);
+
+            var result = clientInfoForm.ShowDialog();
+            if(result.Equals(DialogResult.OK))
+            {
+                textBox_ClientId.Text = clientInfoForm.ClientId;
+                textBox_JobId.Text = clientInfoForm.JobId;
+                EvoBoxFolder = null;
+                richTextBox_BoxNodes.Clear();
+            }
+        }
+        #endregion
     }
+
+    #region Color Rich Text Extension
+    public static class RichTextBoxExtensions
+    {
+        public static void AppendText(this RichTextBox box, string text, Color color)
+        {
+            box.SelectionStart = box.TextLength;
+            box.SelectionLength = 0;
+
+            box.SelectionColor = color;
+            box.AppendText(text);
+            box.SelectionColor = box.ForeColor;
+        }
+    }
+    #endregion Color Rich Text Extension
 }

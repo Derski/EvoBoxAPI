@@ -103,11 +103,14 @@
   <ItemGroup>
     <Compile Include="BoxConfig.cs" />
     <Compile Include="BoxFolderStructure.cs" />
+    <Compile Include="ClientJobInfoStub.cs" />
+    <Compile Include="EvoBoxFile.cs" />
     <Compile Include="EvoBoxFolder.cs" />
     <Compile Include="EvoBoxService.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="FolderManager.cs" />
     <Compile Include="IClientJobInfo.cs" />
+    <Compile Include="IFolderManager.cs" />
     <Compile Include="NtpLibrary.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TreeNodeCustomData.cs" />

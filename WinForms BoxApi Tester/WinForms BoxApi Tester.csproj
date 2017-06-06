@@ -25,7 +25,7 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>12</ApplicationRevision>
+    <ApplicationRevision>17</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -134,11 +134,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="FileFolderSelectForm.cs">
+    <Compile Include="Form_FileFolderSelect.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FileFolderSelectForm.Designer.cs">
-      <DependentUpon>FileFolderSelectForm.cs</DependentUpon>
+    <Compile Include="Form_FileFolderSelect.Designer.cs">
+      <DependentUpon>Form_FileFolderSelect.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Form_ClientJobInfo.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form_ClientJobInfo.Designer.cs">
+      <DependentUpon>Form_ClientJobInfo.cs</DependentUpon>
     </Compile>
     <Compile Include="Form_FolderManager.cs">
       <SubType>Form</SubType>
@@ -158,8 +164,11 @@
     <Compile Include="TreeFileSelector.Designer.cs">
       <DependentUpon>TreeFileSelector.cs</DependentUpon>
     </Compile>
-    <EmbeddedResource Include="FileFolderSelectForm.resx">
-      <DependentUpon>FileFolderSelectForm.cs</DependentUpon>
+    <EmbeddedResource Include="Form_FileFolderSelect.resx">
+      <DependentUpon>Form_FileFolderSelect.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form_ClientJobInfo.resx">
+      <DependentUpon>Form_ClientJobInfo.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Form_FolderManager.resx">
       <DependentUpon>Form_FolderManager.cs</DependentUpon>
@@ -180,6 +189,7 @@
       <DependentUpon>TreeFileSelector.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="packages.config" />
+    <None Include="Properties\DataSources\EvoBoxAPI.EvoBoxFolder.datasource" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
