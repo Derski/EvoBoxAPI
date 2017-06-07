@@ -1,7 +1,7 @@
 ﻿using Box.V2;
 using Box.V2.Models;
 using Box.V2.Services;
-using EvoBoxAPI;
+using EvoBoxAPILibrary;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 using Extensions;
 using EvoBoxAPILibrary;
 
-namespace EvoBoxAPI
+namespace EvoBoxAPILibrary
 {
     public class FolderManager:IFolderManager
     {

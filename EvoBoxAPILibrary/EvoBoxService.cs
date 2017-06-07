@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 // this is a useful link:  https://github.com/box/box-windows-sdk-v2/tree/master/Box.V2/Managers
 
-namespace EvoBoxAPI
+namespace EvoBoxAPILibrary
 {
     public static class EvoBoxService
     {
@@ -62,9 +62,32 @@ namespace EvoBoxAPI
             {
                 BoxClient adminClient = GetAdminClient();
                 var searchManager = adminClient.SearchManager;
+
                 //var searchResults = await searchManager.SearchAsync(keyword);
-                var searchResults =  searchManager.SearchAsync(keyword);
                 //return searchResults;
+
+                var searchResults = searchManager.SearchAsync(keyword);
+                return searchResults.Result;
+
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public static async Task<BoxCollection<BoxItem>> GetFolderItemsById(string id, BoxClient client)
+        {
+            try
+            {
+                BoxClient adminClient = GetAdminClient();
+                var folderManager = adminClient.FoldersManager;
+
+                //todo read up more about async methods in c#
+                //var searchResults = await searchManager.SearchAsync(keyword);
+                //return searchResults;
+
+                var searchResults = folderManager.GetFolderItemsAsync(id, limit: 1000);
 
                 return searchResults.Result;
 

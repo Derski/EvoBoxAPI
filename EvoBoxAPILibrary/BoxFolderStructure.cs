@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace EvoBoxAPI
+namespace EvoBoxAPILibrary
 {
     public static class BoxFolderStructure
     {
@@ -20,7 +20,7 @@ namespace EvoBoxAPI
         public static EvoBoxFolder CreateLocalEvoBoxFolderStructure
             (TreeNodeCollection nodes,string clientId, string jobId)
         {
-            List<EvoBoxFolder> evoBoxFolders = new List<EvoBoxAPI.EvoBoxFolder>();
+            List<EvoBoxFolder> evoBoxFolders = new List<EvoBoxFolder>();
             foreach (TreeNode node in nodes)
             {
                 if(node.Checked)

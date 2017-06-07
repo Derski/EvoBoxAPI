@@ -1,4 +1,4 @@
-﻿using EvoBoxAPI;
+﻿using EvoBoxAPILibrary;
 using FileFolderSelector;
 using System;
 using System.Collections.Generic;
@@ -26,7 +26,7 @@ namespace WinForms_BoxApi_Tester
         public Form_FolderManager()
         {
             InitializeComponent();
-            BoxClient boxClient =  EvoBoxAPI.EvoBoxService.GetAdminClient();
+            BoxClient boxClient =  EvoBoxService.GetAdminClient();
             folderManager = new FolderManager(boxClient);
             textBox_AdminToken.Text = folderManager.AdminToken;
         }

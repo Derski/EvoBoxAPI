@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Extensions;
-using EvoBoxAPI;
+using EvoBoxAPILibrary;
 using System.Deployment.Application;
 using System.Text.RegularExpressions;
 

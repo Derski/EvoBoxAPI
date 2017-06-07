@@ -4,10 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EvoBoxAPI
+namespace EvoBoxAPILibrary
 {
     public interface IFileManager
     {
-        void GetBoxFileIdsForBoxFolders();
+        void GetBoxFileInfoForBoxFolders(EvoBoxFolder folder);
+        void GetBoxFileInfoForBoxFolders(string evoBoxFolderId, List<EvoBoxFile> boxFiles);
     }
 }

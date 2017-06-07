@@ -18,6 +18,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinForms BoxApi Tester", "W
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EvoBoxAPILibrary", "EvoBoxAPILibrary\EvoBoxAPILibrary.csproj", "{98FFC636-FC94-49A4-8FA6-E81EF62FF618}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EvoBoxAPILibrary.Tests", "EvoBoxAPILibrary.Tests\EvoBoxAPILibrary.Tests.csproj", "{D0754B8A-647E-43D7-9F20-68D93DD35593}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -40,6 +42,10 @@ Global
 		{98FFC636-FC94-49A4-8FA6-E81EF62FF618}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{98FFC636-FC94-49A4-8FA6-E81EF62FF618}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{98FFC636-FC94-49A4-8FA6-E81EF62FF618}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D0754B8A-647E-43D7-9F20-68D93DD35593}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D0754B8A-647E-43D7-9F20-68D93DD35593}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D0754B8A-647E-43D7-9F20-68D93DD35593}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D0754B8A-647E-43D7-9F20-68D93DD35593}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
