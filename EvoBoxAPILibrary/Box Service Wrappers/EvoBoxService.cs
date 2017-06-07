@@ -22,7 +22,6 @@ namespace EvoBoxAPILibrary
             //var jsonPath = @"C:\Users\cderkowski\Source\Repos\EvoBoxAPI\src\EvoBoxAPI\BoxConfig.json";
             //Stream jsonFileStream = new FileStream(jsonPath, FileMode.Open);
             //IBoxConfig boxConfig = Box.V2.Config.BoxConfig.CreateFromJsonFile(jsonFileStream);
-
             //IBoxConfig boxConfig = Box.V2.Config.BoxConfig.CreateFromJsonString();
 
             BoxConfig boxConfig = new BoxConfig
@@ -37,7 +36,17 @@ namespace EvoBoxAPILibrary
 
             BoxJWTAuth boxJWT;
             boxJWT = new BoxJWTAuth(boxConfig);
-            NtpLibrary.SystemTimeHack.CheckAndTryToFixSystemTime();
+
+            try
+            {
+                NtpLibrary.SystemTimeHack.CheckAndTryToFixSystemTime();
+            }
+            catch (Exception)
+            {
+                
+            }
+            
+
             try
             {
                 string adminToken = boxJWT.AdminToken();
