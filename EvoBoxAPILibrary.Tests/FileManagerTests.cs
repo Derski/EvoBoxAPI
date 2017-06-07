@@ -16,6 +16,7 @@ namespace EvoBoxAPILibrary.Tests
             //arrange
             BoxClient client =  EvoBoxService.GetAdminClient();
             FileManager manager = new FileManager(client);
+            //TODO the box testing will need a very extensive setup to mimic real life use cases better
             string boxFolderId = "29006365354";
 
             List<EvoBoxFile> files = new List<EvoBoxFile>();

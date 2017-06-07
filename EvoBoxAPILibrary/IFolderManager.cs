@@ -19,9 +19,6 @@ namespace EvoBoxAPILibrary
 
         void FindFromClientRootAndPopulateBoxAttributes(EvoBoxFolder localFolder);
 
-        void GetBoxFolderIdsForFileFolders(EvoBoxFolder localFolder, string clientJobPrefix);
-        void ReadInFolderFiles(EvoBoxFolder rootFolder);
-
         void UploadAllFiles(EvoBoxFolder rootFolder);
     }
 }

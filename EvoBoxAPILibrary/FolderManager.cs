@@ -39,12 +39,13 @@ namespace EvoBoxAPILibrary
         }
 
         private BoxClient _boxClient;
-
+        private BoxFolderStructureManager _boxFolderStructureManager;
         #region Constructor
         //Constructor
-        public FolderManager(BoxClient boxClient)
+        public FolderManager(BoxClient boxClient, BoxFolderStructureManager boxFolderStructureManager)
         {
             _boxClient = boxClient;
+            _boxFolderStructureManager = boxFolderStructureManager;
         }
         #endregion Constructor
 
@@ -52,10 +53,8 @@ namespace EvoBoxAPILibrary
         public void CreateNewBoxFolderStructure
             (EvoBoxFolder localFolder, string clientId, string jobId)
         {
-            var clientJobIdFolder =
-                        BoxFolderStructure.GetBoxClientJobIdRootFolderName(clientId, jobId);
-            var clientJobIdPrefix =
-                            BoxFolderStructure.GetBoxClientJobIdPrefix(clientId, jobId);
+            var clientJobIdFolder = _boxFolderStructureManager.GetBoxClientJobIdRootFolderName;
+            var clientJobIdPrefix = _boxFolderStructureManager.GetBoxClientJobIdPrefix;
 
 
             if (localFolder.BoxId == null || localFolder.BoxId=="0")
@@ -213,63 +212,8 @@ namespace EvoBoxAPILibrary
 
         #endregion
 
-        #region Map Local Folders to Box Folders on Box Folder IDs
-        public void GetBoxFolderIdsForFileFolders(EvoBoxFolder localFolder, string clientJobPrefix)
-        {
-            Task<BoxCollection<BoxItem>> task = EvoBoxService.FindFoldersByKeyword(clientJobPrefix, _boxClient);
-            var awaiter = task.GetAwaiter();
-            //awaiter.OnCompleted(() => OnFindFolderComplete(awaiter.GetResult()));
-            var flattened = localFolder.Flatten(x=>x.ChildFolders);
-            foreach (BoxItem boxFolder in awaiter.GetResult().Entries)
-            {
-                string fileName =  boxFolder.Name.Replace(clientJobPrefix, "");
-                var localFolderMatch = flattened.Where(l => l.FolderName == fileName);
-                if(localFolderMatch.Count()==1)
-                {
-                    localFolderMatch.FirstOrDefault().BoxId = boxFolder.Id;
-                    localFolderMatch.FirstOrDefault().BoxParentId = boxFolder.Parent.Id;
-                    localFolderMatch.FirstOrDefault().BoxFolderName = boxFolder.Name;
-                }
-                else if(localFolderMatch.Count() > 1)
-                {
 
-                }
-                else if(localFolderMatch.Count() == 0)
-                {
-                    //no match is found? delete folder from box?
-                }
-            }
-        }
 
-        #endregion Map Local Folders to Box Folders on Box Folder IDs
-
-        #region Read in All the Files in the folder
-        public void ReadInFolderFiles(EvoBoxFolder rootFolder)
-        {
-            foreach(var folder in rootFolder.Flatten(x => x.ChildFolders))
-            {
-                ReadFilesPerFolder(folder);
-            }
-        }
-        private void ReadFilesPerFolder(EvoBoxFolder folder)
-        {
-            if(Directory.Exists(folder.FullPath))
-            {
-                //FILTER
-                var fileExtentions = folder.FileFilter.Replace("*.", ".").Split('|').ToList();
-
-                DirectoryInfo directoryInfo = new DirectoryInfo(folder.FullPath);
-                foreach(var fileInfo in directoryInfo.GetFiles())
-                {
-                    var extension = fileInfo.Extension;
-                    if(fileExtentions.Contains(extension) || fileExtentions.Contains(".*"))
-                    {
-                        folder.FileNames.Add(new EvoBoxFile(fileInfo.FullName));
-                    }
-                }
-            }
-        }
-        #endregion
 
         #region Upload Files
 
@@ -277,17 +221,20 @@ namespace EvoBoxAPILibrary
         {
             foreach(var folder in rootFolder.Flatten(x => x.ChildFolders))
             {
-                foreach( string file in folder.FileNames.Select(f=>f.FullLocalName))
+                foreach( EvoBoxFile file in folder.FileNames)
                 {
-                    var task = EvoBoxService.ExecuteMainAsyncFileUpload(file, folder.BoxId, _boxClient);
-                    var awaiter = task.GetAwaiter();
-                    try
+                    if(!file.MostRecentAlreadyUploaded)
                     {
-                        awaiter.OnCompleted(() => OnFileUploadAsyncComplete(awaiter.GetResult()));
-                    }
-                    catch (Exception ex)
-                    {
-                        throw;
+                        var task = EvoBoxService.ExecuteMainAsyncFileUpload(file.FullLocalName, folder.BoxId, _boxClient);
+                        var awaiter = task.GetAwaiter();
+                        try
+                        {
+                            awaiter.OnCompleted(() => OnFileUploadAsyncComplete(awaiter.GetResult()));
+                        }
+                        catch (Exception ex)
+                        {
+                            throw;
+                        }
                     }
                 }
             }

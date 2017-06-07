@@ -102,7 +102,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BoxConfig.cs" />
-    <Compile Include="BoxFolderStructure.cs" />
+    <Compile Include="BoxFolderStructureManager.cs" />
     <Compile Include="ClientJobInfoStub.cs" />
     <Compile Include="EvoBoxFile.cs" />
     <Compile Include="EvoBoxFolder.cs" />
@@ -110,6 +110,7 @@
     <Compile Include="Extensions.cs" />
     <Compile Include="FileManager.cs" />
     <Compile Include="FolderManager.cs" />
+    <Compile Include="IBoxFolderStructureManager.cs" />
     <Compile Include="IClientJobInfo.cs" />
     <Compile Include="IFileManager.cs" />
     <Compile Include="IFolderManager.cs" />

@@ -19,16 +19,20 @@ namespace WinForms_BoxApi_Tester
 {
     public partial class Form_FolderManager : Form
     {
-        FolderManager folderManager;
-
-       public EvoBoxFolder EvoBoxFolder { get; set; }
-
+        FolderManager _folderManager;
+        FileManager _fileManager;
+        public EvoBoxFolder EvoBoxFolder { get; set; }
+        BoxFolderStructureManager _boxFolderStructureManager;
         public Form_FolderManager()
         {
             InitializeComponent();
             BoxClient boxClient =  EvoBoxService.GetAdminClient();
-            folderManager = new FolderManager(boxClient);
-            textBox_AdminToken.Text = folderManager.AdminToken;
+            _boxFolderStructureManager = 
+                new BoxFolderStructureManager(textBox_ClientId.Text,textBox_JobId.Text);
+
+            _folderManager = new FolderManager(boxClient, _boxFolderStructureManager);
+            _fileManager = new FileManager(boxClient);
+            textBox_AdminToken.Text = _folderManager.AdminToken;
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -72,7 +76,7 @@ namespace WinForms_BoxApi_Tester
             var result =  folderSelector.ShowDialog();
             if(result == DialogResult.OK)
             {
-                EvoBoxFolder  = BoxFolderStructure.CreateLocalEvoBoxFolderStructure
+                EvoBoxFolder  = _boxFolderStructureManager.CreateLocalEvoBoxFolderStructure
                     (folderSelector.SelectedNodes,textBox_ClientId.Text,textBox_JobId.Text);
                 richTextBox_BoxNodes.Clear();
                 IndentPrintFolders(EvoBoxFolder,"",richTextBox_BoxNodes,false); 
@@ -130,7 +134,7 @@ namespace WinForms_BoxApi_Tester
         }
         private void CreateBoxFolders()
         {
-            folderManager.CreateNewBoxFolderStructure
+            _folderManager.CreateNewBoxFolderStructure
                 (EvoBoxFolder,
                 textBox_ClientId.Text,
                 textBox_JobId.Text);
@@ -156,7 +160,9 @@ namespace WinForms_BoxApi_Tester
             }
             else
             {
-                folderManager.FindFromClientRootAndPopulateBoxAttributes(EvoBoxFolder);
+                _boxFolderStructureManager.ReadCloudFolderMetadataLocally
+                    (EvoBoxFolder, _folderManager, _fileManager);
+
                 richTextBox_BoxNodes.Clear();
                 IndentPrintFolders(EvoBoxFolder, "", richTextBox_BoxNodes, true);
                 button_CreateBoxFolders.Enabled = true;
@@ -204,8 +210,7 @@ namespace WinForms_BoxApi_Tester
         #region Upload Files
         private void button_UploadFiles_Click(object sender, EventArgs e)
         {
-            folderManager.ReadInFolderFiles(EvoBoxFolder);
-            folderManager.UploadAllFiles(EvoBoxFolder);
+            _folderManager.UploadAllFiles(EvoBoxFolder);
         }
         #endregion
 
@@ -224,6 +229,10 @@ namespace WinForms_BoxApi_Tester
             {
                 textBox_ClientId.Text = clientInfoForm.ClientId;
                 textBox_JobId.Text = clientInfoForm.JobId;
+
+                _boxFolderStructureManager.UpdateClient(clientInfoForm.ClientId);
+                _boxFolderStructureManager.UpdateJobId(clientInfoForm.JobId);
+
                 EvoBoxFolder = null;
                 richTextBox_BoxNodes.Clear();
             }
