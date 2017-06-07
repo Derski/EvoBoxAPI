@@ -115,9 +115,26 @@ namespace WinForms_BoxApi_Tester
             {
                 richTextBox.AppendText(" (" + folder.FileFilter + ") ");
             }
-            
+            //Indent Files
+            foreach(var file in folder.FileNames)
+            {
+                
+                if(displayBoxInfo)
+                {
+                    richTextBox.AppendText(Environment.NewLine);
+                    if (file.MostRecentAlreadyUploaded)
+                    {
+                        richTextBox.AppendText(tab + "  " + file.LocalFileName, Color.Green);
+                    }
+                    else
+                    {
+                        richTextBox.AppendText(tab + "  " + file.LocalFileName, Color.Red);
+                    }
+                }
 
-            //indent children
+
+            }
+            //Indent children
             richTextBox.AppendText(Environment.NewLine);
             tab += "   ";
             foreach(var childFolder in folder.ChildFolders)
