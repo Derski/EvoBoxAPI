@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Xml;
 
 namespace EvoBoxAPILibrary
 {
@@ -90,6 +91,161 @@ namespace EvoBoxAPILibrary
             
         }
 
+
+        public EvoBoxFolder CreateLocalEvoBoxFolderStructure(string folderStructureFilePath)
+        {
+            return DeserializeTreeView(new TreeView(), folderStructureFilePath);
+        }
+
+        //*************************test
+        // Xml tag for node, e.g. 'node' in case of <node></node>
+        private const string XmlNodeTag = "node";
+        // Xml attributes for node e.g. <node text="Asia" tag="" 
+        // imageindex="1"></node>
+        private const string XmlNodeTextAtt = "text";
+        private const string XmlNodeCheckedAtt = "checked";
+        private const string XmlNodeExpandedAtt = "expanded";
+        private const string XmlNodeTagAtt = "tag";
+        private const string XmlNodeImageIndexAtt = "imageindex";
+        private EvoBoxFolder DeserializeTreeView(TreeView treeView, string fileName )
+        {
+            EvoBoxFolder rootFolder = null;
+            XmlTextReader reader = null;
+            try
+            {
+                // disabling re-drawing of treeview till all nodes are added
+                treeView.BeginUpdate();
+                reader = new XmlTextReader(fileName);
+                System.Windows.Forms.TreeNode parentNode = null;
+                while (reader.Read())
+                {
+                    if (reader.NodeType == XmlNodeType.Element)
+                    {
+                        if (reader.Name == XmlNodeTag)
+                        {
+                            System.Windows.Forms.TreeNode newNode = new System.Windows.Forms.TreeNode();
+                            EvoBoxFolder newFolder = null;
+                            bool isEmptyElement = reader.IsEmptyElement;
+
+                            // loading node attributes
+                            int attributeCount = reader.AttributeCount;
+                            if (attributeCount > 0)
+                            {
+                                Dictionary<string, string> attributesDict = new Dictionary<string, string>();
+                                for (int i = 0; i < attributeCount; i++)
+                                {
+                                    reader.MoveToAttribute(i);
+                                    SetAttributeValue(newNode,
+                                                 reader.Name, reader.Value);
+                                    attributesDict.Add(reader.Name, reader.Value);
+                                }
+                                if(attributesDict.ContainsKey(XmlNodeCheckedAtt) && attributesDict[XmlNodeCheckedAtt]== "True")
+                                {
+                                    newFolder = new EvoBoxFolder(attributesDict[XmlNodeTextAtt]);
+                                    if(attributesDict.ContainsKey(XmlNodeTagAtt))
+                                    {
+                                        var tagInfo = new TreeNodeCustomData(attributesDict[XmlNodeTagAtt]);
+                                        newFolder.FileFilter = tagInfo.FileFilter;
+                                        newFolder.FullPath = tagInfo.FullFilePath;
+                                    }
+                                }
+                            }
+                            // add new node to Parent Node or TreeView
+                            if (parentNode != null)
+                                parentNode.Nodes.Add(newNode);
+                            else
+                                treeView.Nodes.Add(newNode);
+
+                            //same as above for the EvoBoxFolder
+                            if(rootFolder != null )
+                            {
+                                if(newFolder != null)
+                                {
+                                    rootFolder.ChildFolders.Add(newFolder);
+                                }
+                                
+                            }
+                            else
+                            {
+
+                            }
+
+                            // making current node 'ParentNode' if its not empty
+                            if (!isEmptyElement)
+                            {
+                                parentNode = newNode;
+                            }
+                        }
+                    }
+                    // moving up to in TreeView if end tag is encountered
+                    else if (reader.NodeType == XmlNodeType.EndElement)
+                    {
+                        if (reader.Name == XmlNodeTag)
+                        {
+                            parentNode = parentNode.Parent;
+                        }
+                    }
+                    else if (reader.NodeType == XmlNodeType.XmlDeclaration)
+                    {
+                        //Ignore Xml Declaration                    
+                    }
+                    else if (reader.NodeType == XmlNodeType.None)
+                    {
+                        return rootFolder;
+                    }
+                    else if (reader.NodeType == XmlNodeType.Text)
+                    {
+                        parentNode.Nodes.Add(reader.Value);
+                    }
+
+                }
+            }
+            finally
+            {
+                // enabling redrawing of treeview after all nodes are added
+                treeView.EndUpdate();
+                reader.Close();
+                treeView.ExpandAll();
+            }
+            return rootFolder;
+        }
+        /// <span class="code-SummaryComment"><summary></span>
+        /// Used by Deserialize method for setting properties of
+        /// TreeNode from xml node attributes
+        /// <span class="code-SummaryComment"></summary></span>
+        private void SetAttributeValue(System.Windows.Forms.TreeNode node,
+                           string propertyName, string value)
+        {
+            if (propertyName == XmlNodeTextAtt)
+            {
+                node.Text = value;
+            }
+            else if (propertyName == XmlNodeImageIndexAtt)
+            {
+                node.ImageIndex = int.Parse(value);
+            }
+            else if (propertyName == XmlNodeTagAtt)
+            {
+                node.Tag = new TreeNodeCustomData(value);
+            }
+            else if (propertyName == XmlNodeCheckedAtt)
+            {
+                bool isChecked = false;
+                bool.TryParse(value, out isChecked);
+                node.Checked = isChecked;
+            }
+            else if (propertyName == XmlNodeExpandedAtt)
+            {
+                bool isExpanded = false;
+                bool.TryParse(value, out isExpanded);
+                if (isExpanded)
+                {
+                    node.Expand();
+                }
+
+            }
+        }
+        //*********************
         #endregion
 
         #region Validate with Box which local folders or files already exist in the cloud and populate the box IDs and SHA1 hash values

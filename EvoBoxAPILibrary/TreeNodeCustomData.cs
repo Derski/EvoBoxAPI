@@ -37,7 +37,7 @@ namespace EvoBoxAPILibrary
             var fileFilterArray = customTagArray[1].Split('=');//FileFilter
             FileFilter = fileFilterArray[1];
 
-            var fullFilePathArray = customTagArray[2].Split('=');//FileFilter
+            var fullFilePathArray = customTagArray[2].Split('=');//FullFilepath
             FullFilePath = fullFilePathArray[1];
 
             var isDirectoryArray = customTagArray[3].Split('=');//FileFilter

@@ -21,6 +21,8 @@ namespace EvoBoxAPILibrary
 
         public string BoxParentId { get; set; }
 
+        public EvoBoxFolder Parent { get; set; }
+
         private List<EvoBoxFolder> _childFolders;
         public List<EvoBoxFolder> ChildFolders
         {

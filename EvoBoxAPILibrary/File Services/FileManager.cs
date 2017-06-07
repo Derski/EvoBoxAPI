@@ -20,7 +20,6 @@ namespace EvoBoxAPILibrary
         {
             GetBoxFileInfoForBoxFolders(folder.BoxId, folder.FileNames);
         }
-
         public void GetBoxFileInfoForBoxFolders(string evoBoxFolderId, List<EvoBoxFile> boxFiles)
         {
             var task = EvoBoxService.GetFolderItemsById(evoBoxFolderId, _client);
