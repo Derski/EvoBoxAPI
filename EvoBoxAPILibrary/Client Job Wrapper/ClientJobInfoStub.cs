@@ -11,6 +11,26 @@ namespace EvoBoxAPILibrary
         List<string> clientMockUps;
         Dictionary<string, List<string>> ClientJobs;
 
+        public string CurrentSelectedClient { get; set; }
+
+        public string CurrentSelectedJobId { get; set; }
+
+        public string GetBoxClientJobIdPrefix
+        {
+            get
+            {
+                return CurrentSelectedClient + "_" + CurrentSelectedJobId + "_";
+            }
+        }
+
+        public string GetBoxClientJobIdRootFolderName
+        {
+            get
+            {
+                return CurrentSelectedClient + "_" + CurrentSelectedJobId;
+            }
+        }
+
         public ClientJobInfoStub()
         {
             clientMockUps = new List<string>();

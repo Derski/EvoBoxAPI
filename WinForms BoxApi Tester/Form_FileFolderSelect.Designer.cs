@@ -54,6 +54,12 @@
             this.button_Save = new System.Windows.Forms.Button();
             this.button_Clear = new System.Windows.Forms.Button();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.panel3 = new System.Windows.Forms.Panel();
+            this.labelClientId = new System.Windows.Forms.Label();
+            this.textBox_ClientId = new System.Windows.Forms.TextBox();
+            this.labelJobId = new System.Windows.Forms.Label();
+            this.textBox_JobId = new System.Windows.Forms.TextBox();
+            this.button_GetClientJobInfo = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.contextMenuStrip1.SuspendLayout();
@@ -61,15 +67,16 @@
             this.tableLayoutPanel1.SuspendLayout();
             this.panel2.SuspendLayout();
             this.panel1.SuspendLayout();
+            this.panel3.SuspendLayout();
             this.SuspendLayout();
             // 
             // groupBox1
             // 
             this.groupBox1.Controls.Add(this.treeFileSelector);
             this.groupBox1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.groupBox1.Location = new System.Drawing.Point(3, 39);
+            this.groupBox1.Location = new System.Drawing.Point(3, 79);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(557, 431);
+            this.groupBox1.Size = new System.Drawing.Size(623, 432);
             this.groupBox1.TabIndex = 1;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Select Files";
@@ -81,13 +88,13 @@
             this.treeFileSelector.Dock = System.Windows.Forms.DockStyle.Fill;
             this.treeFileSelector.Location = new System.Drawing.Point(3, 18);
             this.treeFileSelector.Name = "treeFileSelector";
-            this.treeFileSelector.Size = new System.Drawing.Size(551, 410);
+            this.treeFileSelector.Size = new System.Drawing.Size(617, 411);
             this.treeFileSelector.TabIndex = 0;
             // 
             // button_OK
             // 
             this.button_OK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_OK.Location = new System.Drawing.Point(314, 5);
+            this.button_OK.Location = new System.Drawing.Point(380, 5);
             this.button_OK.Name = "button_OK";
             this.button_OK.Size = new System.Drawing.Size(117, 23);
             this.button_OK.TabIndex = 7;
@@ -98,7 +105,7 @@
             // button_Cancel
             // 
             this.button_Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_Cancel.Location = new System.Drawing.Point(437, 5);
+            this.button_Cancel.Location = new System.Drawing.Point(503, 5);
             this.button_Cancel.Name = "button_Cancel";
             this.button_Cancel.Size = new System.Drawing.Size(117, 23);
             this.button_Cancel.TabIndex = 8;
@@ -118,9 +125,9 @@
             this.groupBox2.Controls.Add(this.textBox_SelectedNodeFilter);
             this.groupBox2.Controls.Add(this.label_FileFilter);
             this.groupBox2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.groupBox2.Location = new System.Drawing.Point(3, 476);
+            this.groupBox2.Location = new System.Drawing.Point(3, 517);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(557, 130);
+            this.groupBox2.Size = new System.Drawing.Size(623, 130);
             this.groupBox2.TabIndex = 9;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Selected Node";
@@ -231,39 +238,39 @@
             // 
             this.tableLayoutPanel1.ColumnCount = 1;
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel1.Controls.Add(this.panel2, 0, 0);
-            this.tableLayoutPanel1.Controls.Add(this.panel1, 0, 3);
-            this.tableLayoutPanel1.Controls.Add(this.groupBox1, 0, 1);
-            this.tableLayoutPanel1.Controls.Add(this.groupBox2, 0, 2);
+            this.tableLayoutPanel1.Controls.Add(this.panel2, 0, 1);
+            this.tableLayoutPanel1.Controls.Add(this.panel1, 0, 4);
+            this.tableLayoutPanel1.Controls.Add(this.groupBox1, 0, 2);
+            this.tableLayoutPanel1.Controls.Add(this.groupBox2, 0, 3);
+            this.tableLayoutPanel1.Controls.Add(this.panel3, 0, 0);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
-            this.tableLayoutPanel1.RowCount = 4;
+            this.tableLayoutPanel1.RowCount = 5;
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 40F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 36F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 136F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 39F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(563, 648);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(629, 689);
             this.tableLayoutPanel1.TabIndex = 10;
             // 
             // panel2
             // 
-            this.panel2.Controls.Add(this.button_Load);
             this.panel2.Controls.Add(this.button_Select);
             this.panel2.Controls.Add(this.button_Save);
             this.panel2.Controls.Add(this.button_Clear);
             this.panel2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel2.Location = new System.Drawing.Point(3, 3);
+            this.panel2.Location = new System.Drawing.Point(3, 43);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(557, 30);
+            this.panel2.Size = new System.Drawing.Size(623, 30);
             this.panel2.TabIndex = 10;
             // 
             // button_Load
             // 
-            this.button_Load.Location = new System.Drawing.Point(373, 5);
+            this.button_Load.Location = new System.Drawing.Point(522, 5);
             this.button_Load.Name = "button_Load";
-            this.button_Load.Size = new System.Drawing.Size(117, 23);
+            this.button_Load.Size = new System.Drawing.Size(92, 23);
             this.button_Load.TabIndex = 5;
             this.button_Load.Text = "Load Saved";
             this.button_Load.UseVisualStyleBackColor = true;
@@ -273,7 +280,7 @@
             // 
             this.button_Select.Location = new System.Drawing.Point(6, 5);
             this.button_Select.Name = "button_Select";
-            this.button_Select.Size = new System.Drawing.Size(117, 23);
+            this.button_Select.Size = new System.Drawing.Size(92, 23);
             this.button_Select.TabIndex = 2;
             this.button_Select.Text = "Add Folder";
             this.button_Select.UseVisualStyleBackColor = true;
@@ -281,9 +288,9 @@
             // 
             // button_Save
             // 
-            this.button_Save.Location = new System.Drawing.Point(127, 5);
+            this.button_Save.Location = new System.Drawing.Point(522, 5);
             this.button_Save.Name = "button_Save";
-            this.button_Save.Size = new System.Drawing.Size(117, 23);
+            this.button_Save.Size = new System.Drawing.Size(92, 23);
             this.button_Save.TabIndex = 3;
             this.button_Save.Text = "Save";
             this.button_Save.UseVisualStyleBackColor = true;
@@ -291,9 +298,9 @@
             // 
             // button_Clear
             // 
-            this.button_Clear.Location = new System.Drawing.Point(248, 5);
+            this.button_Clear.Location = new System.Drawing.Point(104, 5);
             this.button_Clear.Name = "button_Clear";
-            this.button_Clear.Size = new System.Drawing.Size(117, 23);
+            this.button_Clear.Size = new System.Drawing.Size(92, 23);
             this.button_Clear.TabIndex = 4;
             this.button_Clear.Text = "Clear";
             this.button_Clear.UseVisualStyleBackColor = true;
@@ -304,21 +311,79 @@
             this.panel1.Controls.Add(this.button_Cancel);
             this.panel1.Controls.Add(this.button_OK);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel1.Location = new System.Drawing.Point(3, 612);
+            this.panel1.Location = new System.Drawing.Point(3, 653);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(557, 33);
+            this.panel1.Size = new System.Drawing.Size(623, 33);
             this.panel1.TabIndex = 0;
+            // 
+            // panel3
+            // 
+            this.panel3.Controls.Add(this.button_GetClientJobInfo);
+            this.panel3.Controls.Add(this.textBox_JobId);
+            this.panel3.Controls.Add(this.labelJobId);
+            this.panel3.Controls.Add(this.textBox_ClientId);
+            this.panel3.Controls.Add(this.labelClientId);
+            this.panel3.Controls.Add(this.button_Load);
+            this.panel3.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel3.Location = new System.Drawing.Point(3, 3);
+            this.panel3.Name = "panel3";
+            this.panel3.Size = new System.Drawing.Size(623, 34);
+            this.panel3.TabIndex = 11;
+            // 
+            // labelClientId
+            // 
+            this.labelClientId.AutoSize = true;
+            this.labelClientId.Location = new System.Drawing.Point(7, 8);
+            this.labelClientId.Name = "labelClientId";
+            this.labelClientId.Size = new System.Drawing.Size(62, 17);
+            this.labelClientId.TabIndex = 6;
+            this.labelClientId.Text = "Client Id:";
+            // 
+            // textBox_ClientId
+            // 
+            this.textBox_ClientId.Location = new System.Drawing.Point(75, 5);
+            this.textBox_ClientId.Name = "textBox_ClientId";
+            this.textBox_ClientId.ReadOnly = true;
+            this.textBox_ClientId.Size = new System.Drawing.Size(125, 22);
+            this.textBox_ClientId.TabIndex = 7;
+            // 
+            // labelJobId
+            // 
+            this.labelJobId.AutoSize = true;
+            this.labelJobId.Location = new System.Drawing.Point(206, 8);
+            this.labelJobId.Name = "labelJobId";
+            this.labelJobId.Size = new System.Drawing.Size(50, 17);
+            this.labelJobId.TabIndex = 8;
+            this.labelJobId.Text = "Job Id:";
+            // 
+            // textBox_JobId
+            // 
+            this.textBox_JobId.Location = new System.Drawing.Point(262, 5);
+            this.textBox_JobId.Name = "textBox_JobId";
+            this.textBox_JobId.ReadOnly = true;
+            this.textBox_JobId.Size = new System.Drawing.Size(139, 22);
+            this.textBox_JobId.TabIndex = 9;
+            // 
+            // button_GetClientJobInfo
+            // 
+            this.button_GetClientJobInfo.Location = new System.Drawing.Point(423, 5);
+            this.button_GetClientJobInfo.Name = "button_GetClientJobInfo";
+            this.button_GetClientJobInfo.Size = new System.Drawing.Size(93, 23);
+            this.button_GetClientJobInfo.TabIndex = 11;
+            this.button_GetClientJobInfo.Text = "Job Info";
+            this.button_GetClientJobInfo.UseVisualStyleBackColor = true;
+            this.button_GetClientJobInfo.Click += new System.EventHandler(this.button_GetClientJobInfo_Click);
             // 
             // FileFolderSelectForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(563, 648);
+            this.ClientSize = new System.Drawing.Size(629, 689);
             this.Controls.Add(this.tableLayoutPanel1);
             this.MaximumSize = new System.Drawing.Size(1500, 1000);
             this.MinimumSize = new System.Drawing.Size(581, 693);
             this.Name = "FileFolderSelectForm";
-            this.Text = "File Select Form";
+            this.Text = "Folder Structure for: ";
             this.Load += new System.EventHandler(this.FileFolderSelectForm_Load);
             this.groupBox1.ResumeLayout(false);
             this.groupBox2.ResumeLayout(false);
@@ -328,6 +393,8 @@
             this.tableLayoutPanel1.ResumeLayout(false);
             this.panel2.ResumeLayout(false);
             this.panel1.ResumeLayout(false);
+            this.panel3.ResumeLayout(false);
+            this.panel3.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -359,5 +426,11 @@
         private System.Windows.Forms.Button button_Save;
         private System.Windows.Forms.Button button_Clear;
         private System.Windows.Forms.Panel panel1;
+        private System.Windows.Forms.Panel panel3;
+        private System.Windows.Forms.Label labelClientId;
+        private System.Windows.Forms.TextBox textBox_ClientId;
+        private System.Windows.Forms.Label labelJobId;
+        private System.Windows.Forms.TextBox textBox_JobId;
+        private System.Windows.Forms.Button button_GetClientJobInfo;
     }
 }

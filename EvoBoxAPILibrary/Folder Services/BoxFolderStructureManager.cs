@@ -13,44 +13,18 @@ namespace EvoBoxAPILibrary
 {
     public class BoxFolderStructureManager: IBoxFolderStructureManager
     {
-        string _jobId;
-        string _clientId;
-
-        public BoxFolderStructureManager(string clientId, string jobId)
+        IClientJobInfo _clientJobInfo;
+        public BoxFolderStructureManager(IClientJobInfo clientJobInfo)
         {
-            _jobId = jobId;
-            _clientId = clientId;
+            _clientJobInfo = clientJobInfo;
         }
-
-        public void UpdateClient(string clientId)
-        {
-            _clientId = clientId;
-        }
-        public void UpdateJobId(string jobId)
-        {
-            _jobId = jobId;
-        }
-
-        public string  GetBoxClientJobIdPrefix
-        {
-            get
-            {
-                return _clientId + "_" + _jobId + "_";
-            }
-        }
-        public string GetBoxClientJobIdRootFolderName
-        {
-            get
-            {
-                return _clientId + "_" + _jobId;
-            }
-        }
-
+        
         #region Create box folder structure from client, job and local folders  
         public EvoBoxFolder CreateLocalEvoBoxFolderStructure
             (TreeNodeCollection nodes,string clientId, string jobId)
         {
             List<EvoBoxFolder> evoBoxFolders = new List<EvoBoxFolder>();
+
             foreach (TreeNode node in nodes)
             {
                 if(node.Checked)
@@ -62,16 +36,22 @@ namespace EvoBoxAPILibrary
                     AddChildFolders(folder, firstBoxBode.Nodes);
                 }
             }
-            //create jobId Folder and Client Folder
-            string jobIdPrefix = GetBoxClientJobIdRootFolderName;
 
-            EvoBoxFolder ClientJobPrefixFolder = new EvoBoxFolder(jobIdPrefix);
-            ClientJobPrefixFolder.ChildFolders.AddRange(evoBoxFolders);
+            EvoBoxFolder ClientRootFolder = null;
 
-            EvoBoxFolder ClientRootFolder = new EvoBoxFolder(clientId);
-            ClientRootFolder.ChildFolders.Add(ClientJobPrefixFolder);
+            if (evoBoxFolders.Count>0)
+            {
+                //create jobId Folder and Client Folder
+                string jobIdPrefix = _clientJobInfo.GetBoxClientJobIdRootFolderName;
 
-            ReadInFolderFiles(ClientRootFolder);
+                EvoBoxFolder ClientJobPrefixFolder = new EvoBoxFolder(jobIdPrefix);
+                ClientJobPrefixFolder.ChildFolders.AddRange(evoBoxFolders);
+
+                ClientRootFolder = new EvoBoxFolder(clientId);
+                ClientRootFolder.ChildFolders.Add(ClientJobPrefixFolder);
+
+                ReadInFolderFiles(ClientRootFolder);
+            }
 
             return ClientRootFolder;
         }
@@ -94,10 +74,9 @@ namespace EvoBoxAPILibrary
 
         public EvoBoxFolder CreateLocalEvoBoxFolderStructure(string folderStructureFilePath)
         {
-            return DeserializeTreeView(new TreeView(), folderStructureFilePath);
+            return DeserializeTreeView(folderStructureFilePath);
         }
-
-        //*************************test
+        
         // Xml tag for node, e.g. 'node' in case of <node></node>
         private const string XmlNodeTag = "node";
         // Xml attributes for node e.g. <node text="Asia" tag="" 
@@ -107,16 +86,14 @@ namespace EvoBoxAPILibrary
         private const string XmlNodeExpandedAtt = "expanded";
         private const string XmlNodeTagAtt = "tag";
         private const string XmlNodeImageIndexAtt = "imageindex";
-        private EvoBoxFolder DeserializeTreeView(TreeView treeView, string fileName )
+
+        private EvoBoxFolder DeserializeTreeView(string fileName )
         {
-            EvoBoxFolder rootFolder = null;
+            EvoBoxFolder parentFolder = new EvoBoxFolder("root");
             XmlTextReader reader = null;
             try
             {
-                // disabling re-drawing of treeview till all nodes are added
-                treeView.BeginUpdate();
                 reader = new XmlTextReader(fileName);
-                System.Windows.Forms.TreeNode parentNode = null;
                 while (reader.Read())
                 {
                     if (reader.NodeType == XmlNodeType.Element)
@@ -132,13 +109,7 @@ namespace EvoBoxAPILibrary
                             if (attributeCount > 0)
                             {
                                 Dictionary<string, string> attributesDict = new Dictionary<string, string>();
-                                for (int i = 0; i < attributeCount; i++)
-                                {
-                                    reader.MoveToAttribute(i);
-                                    SetAttributeValue(newNode,
-                                                 reader.Name, reader.Value);
-                                    attributesDict.Add(reader.Name, reader.Value);
-                                }
+                                
                                 if(attributesDict.ContainsKey(XmlNodeCheckedAtt) && attributesDict[XmlNodeCheckedAtt]== "True")
                                 {
                                     newFolder = new EvoBoxFolder(attributesDict[XmlNodeTextAtt]);
@@ -150,30 +121,19 @@ namespace EvoBoxAPILibrary
                                     }
                                 }
                             }
-                            // add new node to Parent Node or TreeView
-                            if (parentNode != null)
-                                parentNode.Nodes.Add(newNode);
-                            else
-                                treeView.Nodes.Add(newNode);
-
                             //same as above for the EvoBoxFolder
-                            if(rootFolder != null )
+                            if(parentFolder != null )
                             {
                                 if(newFolder != null)
                                 {
-                                    rootFolder.ChildFolders.Add(newFolder);
+                                    parentFolder.ChildFolders.Add(newFolder);
+                                    newFolder.Parent = parentFolder;
                                 }
-                                
                             }
-                            else
-                            {
-
-                            }
-
-                            // making current node 'ParentNode' if its not empty
+                            // depth first search
                             if (!isEmptyElement)
                             {
-                                parentNode = newNode;
+                                parentFolder = newFolder;
                             }
                         }
                     }
@@ -182,7 +142,7 @@ namespace EvoBoxAPILibrary
                     {
                         if (reader.Name == XmlNodeTag)
                         {
-                            parentNode = parentNode.Parent;
+                            parentFolder = parentFolder.Parent;
                         }
                     }
                     else if (reader.NodeType == XmlNodeType.XmlDeclaration)
@@ -191,61 +151,21 @@ namespace EvoBoxAPILibrary
                     }
                     else if (reader.NodeType == XmlNodeType.None)
                     {
-                        return rootFolder;
+                        return parentFolder;
                     }
                     else if (reader.NodeType == XmlNodeType.Text)
                     {
-                        parentNode.Nodes.Add(reader.Value);
+                        //not yet sure where to store client and job id data...
                     }
-
                 }
             }
             finally
             {
-                // enabling redrawing of treeview after all nodes are added
-                treeView.EndUpdate();
                 reader.Close();
-                treeView.ExpandAll();
             }
-            return rootFolder;
+            return parentFolder;
         }
-        /// <span class="code-SummaryComment"><summary></span>
-        /// Used by Deserialize method for setting properties of
-        /// TreeNode from xml node attributes
-        /// <span class="code-SummaryComment"></summary></span>
-        private void SetAttributeValue(System.Windows.Forms.TreeNode node,
-                           string propertyName, string value)
-        {
-            if (propertyName == XmlNodeTextAtt)
-            {
-                node.Text = value;
-            }
-            else if (propertyName == XmlNodeImageIndexAtt)
-            {
-                node.ImageIndex = int.Parse(value);
-            }
-            else if (propertyName == XmlNodeTagAtt)
-            {
-                node.Tag = new TreeNodeCustomData(value);
-            }
-            else if (propertyName == XmlNodeCheckedAtt)
-            {
-                bool isChecked = false;
-                bool.TryParse(value, out isChecked);
-                node.Checked = isChecked;
-            }
-            else if (propertyName == XmlNodeExpandedAtt)
-            {
-                bool isExpanded = false;
-                bool.TryParse(value, out isExpanded);
-                if (isExpanded)
-                {
-                    node.Expand();
-                }
 
-            }
-        }
-        //*********************
         #endregion
 
         #region Validate with Box which local folders or files already exist in the cloud and populate the box IDs and SHA1 hash values

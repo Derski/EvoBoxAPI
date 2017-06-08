@@ -11,5 +11,12 @@ namespace EvoBoxAPILibrary
         List<string> GetClientList();
 
         List<string> GetJobListPerClient(string ClientId);
+
+        string CurrentSelectedClient { get; set; }
+
+        string CurrentSelectedJobId { get; set; }
+
+        string GetBoxClientJobIdPrefix { get; }
+        string GetBoxClientJobIdRootFolderName { get; }
     }
 }

@@ -21,17 +21,24 @@ namespace WinForms_BoxApi_Tester
     {
         FolderManager _folderManager;
         FileManager _fileManager;
+        IClientJobInfo clientJobInfo;
         public EvoBoxFolder EvoBoxFolder { get; set; }
         BoxFolderStructureManager _boxFolderStructureManager;
         public Form_FolderManager()
         {
             InitializeComponent();
             BoxClient boxClient =  EvoBoxService.GetAdminClient();
-            _boxFolderStructureManager = 
-                new BoxFolderStructureManager(textBox_ClientId.Text,textBox_JobId.Text);
 
-            _folderManager = new FolderManager(boxClient, _boxFolderStructureManager);
+            clientJobInfo = new ClientJobInfoStub();
+
+            _boxFolderStructureManager = new BoxFolderStructureManager(clientJobInfo);
+
+            _folderManager = new FolderManager(boxClient, _boxFolderStructureManager, clientJobInfo);
+
             _fileManager = new FileManager(boxClient);
+            
+
+
             textBox_AdminToken.Text = _folderManager.AdminToken;
         }
 
@@ -72,12 +79,16 @@ namespace WinForms_BoxApi_Tester
         }
         private void SelectLocalFolders()
         {
-            FileFolderSelectForm folderSelector = new FileFolderSelectForm();
+            FileFolderSelectForm folderSelector = new FileFolderSelectForm(clientJobInfo);
             var result =  folderSelector.ShowDialog();
             if(result == DialogResult.OK)
             {
+                textBox_ClientId.Text = clientJobInfo.CurrentSelectedClient;
+                textBox_JobId.Text = clientJobInfo.CurrentSelectedJobId;
+
                 EvoBoxFolder  = _boxFolderStructureManager.CreateLocalEvoBoxFolderStructure
-                    (folderSelector.SelectedNodes,textBox_ClientId.Text,textBox_JobId.Text);
+                    (folderSelector.SelectedNodes, clientJobInfo.CurrentSelectedClient, clientJobInfo.CurrentSelectedJobId);
+
                 richTextBox_BoxNodes.Clear();
                 IndentPrintFolders(EvoBoxFolder,"",richTextBox_BoxNodes,false); 
             }
@@ -103,6 +114,7 @@ namespace WinForms_BoxApi_Tester
             bool displayBoxInfo
             )
         {
+            if (folder == null) return;
             if(displayBoxInfo)
             {
                 FolderInfoDisplayLogic(folder, tab,richTextBox);
@@ -228,31 +240,6 @@ namespace WinForms_BoxApi_Tester
         private void button_UploadFiles_Click(object sender, EventArgs e)
         {
             _folderManager.UploadAllFiles(EvoBoxFolder);
-        }
-        #endregion
-
-        #region Client Job Info Interface
-        private void button_GetClientJobInfo_Click(object sender, EventArgs e)
-        {
-            GetClientJobInfo();
-        }
-        private void GetClientJobInfo()
-        {
-            IClientJobInfo clientJobInfo = new ClientJobInfoStub();
-            Form_ClientJobInfo clientInfoForm =  new Form_ClientJobInfo(clientJobInfo);
-
-            var result = clientInfoForm.ShowDialog();
-            if(result.Equals(DialogResult.OK))
-            {
-                textBox_ClientId.Text = clientInfoForm.ClientId;
-                textBox_JobId.Text = clientInfoForm.JobId;
-
-                _boxFolderStructureManager.UpdateClient(clientInfoForm.ClientId);
-                _boxFolderStructureManager.UpdateJobId(clientInfoForm.JobId);
-
-                EvoBoxFolder = null;
-                richTextBox_BoxNodes.Clear();
-            }
         }
         #endregion
     }

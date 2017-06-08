@@ -14,7 +14,6 @@ namespace EvoBoxAPILibrary
 {
     public class FolderManager:IFolderManager
     {
-
         public string AdminToken
         {
             get
@@ -40,12 +39,14 @@ namespace EvoBoxAPILibrary
 
         private BoxClient _boxClient;
         private BoxFolderStructureManager _boxFolderStructureManager;
+        private IClientJobInfo _clientJobInfo;
         #region Constructor
         //Constructor
-        public FolderManager(BoxClient boxClient, BoxFolderStructureManager boxFolderStructureManager)
+        public FolderManager(BoxClient boxClient, BoxFolderStructureManager boxFolderStructureManager, IClientJobInfo clientJobInfo)
         {
             _boxClient = boxClient;
             _boxFolderStructureManager = boxFolderStructureManager;
+            _clientJobInfo = clientJobInfo;
         }
         #endregion Constructor
 
@@ -53,9 +54,8 @@ namespace EvoBoxAPILibrary
         public void CreateNewBoxFolderStructure
             (EvoBoxFolder localFolder, string clientId, string jobId)
         {
-            var clientJobIdFolder = _boxFolderStructureManager.GetBoxClientJobIdRootFolderName;
-            var clientJobIdPrefix = _boxFolderStructureManager.GetBoxClientJobIdPrefix;
-
+            var clientJobIdFolder = _clientJobInfo.GetBoxClientJobIdRootFolderName;
+            var clientJobIdPrefix = _clientJobInfo.GetBoxClientJobIdPrefix;
 
             if (localFolder.BoxId == null || localFolder.BoxId=="0")
             {
@@ -135,7 +135,6 @@ namespace EvoBoxAPILibrary
         #endregion Folder Structure Create
 
         #region Find
-
         public BoxItem FindRootClientFolder(string clientId)
         {
             Task<BoxCollection<BoxItem>> task = EvoBoxService.FindFoldersByKeyword(clientId, _boxClient);
@@ -212,9 +211,6 @@ namespace EvoBoxAPILibrary
 
         #endregion
 
-
-
-
         #region Upload Files
 
         public void UploadAllFiles(EvoBoxFolder rootFolder)
@@ -258,7 +254,5 @@ namespace EvoBoxAPILibrary
         }
         #endregion Returning from Async Events
     }
-
-
 
 }

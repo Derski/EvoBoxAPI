@@ -28,6 +28,18 @@ namespace FileFolderSelector
 
     public partial class TreeFileSelector : TreeView
     {
+        TreeNodeXMLSerializer _xMLSerializer;
+        TreeNodeXMLSerializer XMLSerializer
+        {
+            get
+            {
+                if(_xMLSerializer == null)
+                {
+                    _xMLSerializer = new TreeNodeXMLSerializer();
+                }
+                return _xMLSerializer;
+            }
+        }
         public event EventHandler<NodeChangedEventArgs> PropertyChanged;
 
         private System.Windows.Forms.TreeNode _currentSelectedNode;
@@ -99,7 +111,7 @@ namespace FileFolderSelector
             InitializeComponent();
             this.CheckBoxes = true;          
             this.AfterCheck += TreeFileSelector_AfterCheck;
-            this.AfterSelect += TreeFileSelector_AfterSelect;  
+            this.AfterSelect += TreeFileSelector_AfterSelect;
         }
 
         private void TreeFileSelector_AfterSelect(object sender, TreeViewEventArgs e)
@@ -200,193 +212,21 @@ namespace FileFolderSelector
             }
         }
 
+
         #region Save File Section to XML
-        internal void SaveCurrentSelection(string fileName)
+        internal void SaveCurrentSelection(string fileName,string clientId, string jobId)
         {
-            if(File.Exists(fileName))
-            {
-                XmlTextWriter textWriter = new XmlTextWriter(fileName, System.Text.Encoding.ASCII);
-                // writing the xml declaration tag
-                textWriter.WriteStartDocument();
-                //textWriter.WriteRaw("\r\n");
-                // writing the main tag that encloses all node tags
-                textWriter.WriteStartElement("TreeView");
-
-                // save the nodes, recursive method
-                SaveNodes(this.Nodes, textWriter);
-
-                textWriter.WriteEndElement();
-
-                textWriter.Close();
-            }
-
-
+            XMLSerializer.SaveCurrentSelection(fileName, this.Nodes, clientId,jobId);
         }
-
-        // Xml tag for node, e.g. 'node' in case of <node></node>
-        private const string XmlNodeTag = "node";
-        // Xml attributes for node e.g. <node text="Asia" tag="" 
-        // imageindex="1"></node>
-        private const string XmlNodeTextAtt = "text";
-        private const string XmlNodeCheckedAtt = "checked";
-        private const string XmlNodeExpandedAtt = "expanded";
-        private const string XmlNodeTagAtt = "tag";
-        private const string XmlNodeImageIndexAtt = "imageindex";
-
-        private void SaveNodes(TreeNodeCollection nodesCollection,XmlTextWriter textWriter)
-        {
-            for (int i = 0; i < nodesCollection.Count; i++)
-            {
-                System.Windows.Forms.TreeNode node = nodesCollection[i];
-                textWriter.WriteStartElement(XmlNodeTag);
-                textWriter.WriteAttributeString(XmlNodeTextAtt,
-                                                           node.Text);
-                //add checked
-                textWriter.WriteAttributeString(XmlNodeCheckedAtt,
-                                                           node.Checked.ToString());
-
-                //add expanded
-                textWriter.WriteAttributeString(XmlNodeExpandedAtt,
-                                                           node.IsExpanded.ToString());
-
-                textWriter.WriteAttributeString(
-                    XmlNodeImageIndexAtt, node.ImageIndex.ToString());
-                if (node.Tag != null)
-                {
-                    TreeNodeCustomData customTagNode = (TreeNodeCustomData)node.Tag;
-                    textWriter.WriteAttributeString(XmlNodeTagAtt, customTagNode.CustomTagAsString);
-                }  
-                // add other node properties to serialize here  
-                if (node.Nodes.Count > 0)
-                {
-                    SaveNodes(node.Nodes, textWriter);
-                }
-                textWriter.WriteEndElement();
-            }
-        }
-
-
         #endregion Save File Selection to XML
 
         #region Load Selection From File
-        internal void LoadSavedSelection(string fileName)
+        internal void LoadSavedSelection(string fileName, out string clientJobIdInfo)
         {
-            if(File.Exists(fileName))
-            {
-                this.Nodes.Clear();
-                DeserializeTreeView(this, fileName);
-            }
+            clientJobIdInfo = "";
+            XMLSerializer.LoadSavedSelection(fileName, this,out clientJobIdInfo);
+
         }
-        private void DeserializeTreeView(TreeView treeView, string fileName)
-        {
-            XmlTextReader reader = null;
-            try
-            {
-                // disabling re-drawing of treeview till all nodes are added
-                treeView.BeginUpdate();
-                reader = new XmlTextReader(fileName);
-                System.Windows.Forms.TreeNode parentNode = null;
-                while (reader.Read())
-                {
-                    if (reader.NodeType == XmlNodeType.Element)
-                    {
-                        if (reader.Name == XmlNodeTag)
-                        {
-                            System.Windows.Forms.TreeNode newNode = new System.Windows.Forms.TreeNode();
-                            bool isEmptyElement = reader.IsEmptyElement;
-
-                            // loading node attributes
-                            int attributeCount = reader.AttributeCount;
-                            if (attributeCount > 0)
-                            {
-                                for (int i = 0; i < attributeCount; i++)
-                                {
-                                    reader.MoveToAttribute(i);
-                                    SetAttributeValue(newNode,
-                                                 reader.Name, reader.Value);
-                                }
-                            }
-                            // add new node to Parent Node or TreeView
-                            if (parentNode != null)
-                                parentNode.Nodes.Add(newNode);
-                            else
-                                treeView.Nodes.Add(newNode);
-
-                            // making current node 'ParentNode' if its not empty
-                            if (!isEmptyElement)
-                            {
-                                parentNode = newNode;
-                            }
-                        }
-                    }
-                    // moving up to in TreeView if end tag is encountered
-                    else if (reader.NodeType == XmlNodeType.EndElement)
-                    {
-                        if (reader.Name == XmlNodeTag)
-                        {
-                            parentNode = parentNode.Parent;
-                        }
-                    }
-                    else if (reader.NodeType == XmlNodeType.XmlDeclaration)
-                    {
-                        //Ignore Xml Declaration                    
-                    }
-                    else if (reader.NodeType == XmlNodeType.None)
-                    {
-                        return;
-                    }
-                    else if (reader.NodeType == XmlNodeType.Text)
-                    {
-                        parentNode.Nodes.Add(reader.Value);
-                    }
-
-                }
-            }
-            finally
-            {
-                // enabling redrawing of treeview after all nodes are added
-                treeView.EndUpdate();
-                reader.Close();
-                treeView.ExpandAll();
-            }
-        }
-        /// <span class="code-SummaryComment"><summary></span>
-        /// Used by Deserialize method for setting properties of
-        /// TreeNode from xml node attributes
-        /// <span class="code-SummaryComment"></summary></span>
-        private void SetAttributeValue(System.Windows.Forms.TreeNode node,
-                           string propertyName, string value)
-        {
-            if (propertyName == XmlNodeTextAtt)
-            {
-                node.Text = value;
-            }
-            else if (propertyName == XmlNodeImageIndexAtt)
-            {
-                node.ImageIndex = int.Parse(value);
-            }
-            else if (propertyName == XmlNodeTagAtt)
-            {
-                node.Tag = new TreeNodeCustomData(value);
-            }
-            else if (propertyName == XmlNodeCheckedAtt)
-            {
-                bool isChecked = false;
-                bool.TryParse( value, out isChecked);
-                node.Checked = isChecked;
-            }
-            else if (propertyName == XmlNodeExpandedAtt)
-            {
-                bool isExpanded = false;
-                bool.TryParse(value, out isExpanded);
-                if(isExpanded)
-                {
-                    node.Expand();
-                }
-                
-            }
-        }
-
         #endregion Load Selection From File
 
         #region Clear All Nodes

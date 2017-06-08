@@ -30,9 +30,12 @@
         {
             this.textBox_AdminToken = new System.Windows.Forms.TextBox();
             this.groupBox_FolderManager = new System.Windows.Forms.GroupBox();
-            this.button_BoxAccountInfo = new System.Windows.Forms.Button();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.label_Red = new System.Windows.Forms.Label();
+            this.label_Green = new System.Windows.Forms.Label();
+            this.button1 = new System.Windows.Forms.Button();
+            this.button_Green = new System.Windows.Forms.Button();
             this.button_UploadFiles = new System.Windows.Forms.Button();
             this.button_Validate = new System.Windows.Forms.Button();
             this.richTextBox_BoxNodes = new System.Windows.Forms.RichTextBox();
@@ -44,14 +47,10 @@
             this.textBox_ClientId = new System.Windows.Forms.TextBox();
             this.labelJobId = new System.Windows.Forms.Label();
             this.labelClientId = new System.Windows.Forms.Label();
+            this.button_BoxAccountInfo = new System.Windows.Forms.Button();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.panel1 = new System.Windows.Forms.Panel();
             this.label_AdminToken = new System.Windows.Forms.Label();
-            this.button_Green = new System.Windows.Forms.Button();
-            this.button1 = new System.Windows.Forms.Button();
-            this.label_Green = new System.Windows.Forms.Label();
-            this.label_Red = new System.Windows.Forms.Label();
-            this.button_GetClientJobInfo = new System.Windows.Forms.Button();
             this.groupBox_FolderManager.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
@@ -65,35 +64,24 @@
             this.textBox_AdminToken.Location = new System.Drawing.Point(105, 4);
             this.textBox_AdminToken.Name = "textBox_AdminToken";
             this.textBox_AdminToken.ReadOnly = true;
-            this.textBox_AdminToken.Size = new System.Drawing.Size(652, 22);
+            this.textBox_AdminToken.Size = new System.Drawing.Size(684, 22);
             this.textBox_AdminToken.TabIndex = 1;
             // 
             // groupBox_FolderManager
             // 
-            this.groupBox_FolderManager.Controls.Add(this.button_GetClientJobInfo);
             this.groupBox_FolderManager.Controls.Add(this.statusStrip1);
             this.groupBox_FolderManager.Controls.Add(this.groupBox1);
             this.groupBox_FolderManager.Controls.Add(this.textBox_JobId);
             this.groupBox_FolderManager.Controls.Add(this.textBox_ClientId);
             this.groupBox_FolderManager.Controls.Add(this.labelJobId);
             this.groupBox_FolderManager.Controls.Add(this.labelClientId);
+            this.groupBox_FolderManager.Controls.Add(this.button_LocalFolderSelection);
             this.groupBox_FolderManager.Dock = System.Windows.Forms.DockStyle.Fill;
             this.groupBox_FolderManager.Location = new System.Drawing.Point(3, 43);
             this.groupBox_FolderManager.Name = "groupBox_FolderManager";
             this.groupBox_FolderManager.Size = new System.Drawing.Size(900, 568);
             this.groupBox_FolderManager.TabIndex = 2;
             this.groupBox_FolderManager.TabStop = false;
-            // 
-            // button_BoxAccountInfo
-            // 
-            this.button_BoxAccountInfo.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_BoxAccountInfo.Location = new System.Drawing.Point(769, 4);
-            this.button_BoxAccountInfo.Name = "button_BoxAccountInfo";
-            this.button_BoxAccountInfo.Size = new System.Drawing.Size(122, 23);
-            this.button_BoxAccountInfo.TabIndex = 7;
-            this.button_BoxAccountInfo.Text = "Box Account Info";
-            this.button_BoxAccountInfo.UseVisualStyleBackColor = true;
-            this.button_BoxAccountInfo.Click += new System.EventHandler(this.button_BoxAccountInfo_Click);
             // 
             // statusStrip1
             // 
@@ -117,7 +105,6 @@
             this.groupBox1.Controls.Add(this.button_Validate);
             this.groupBox1.Controls.Add(this.richTextBox_BoxNodes);
             this.groupBox1.Controls.Add(this.label_LocalFolderSelection);
-            this.groupBox1.Controls.Add(this.button_LocalFolderSelection);
             this.groupBox1.Controls.Add(this.label_ClientJobBoxFolders);
             this.groupBox1.Controls.Add(this.button_CreateBoxFolders);
             this.groupBox1.Location = new System.Drawing.Point(9, 44);
@@ -126,6 +113,47 @@
             this.groupBox1.TabIndex = 7;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Folder Structure";
+            // 
+            // label_Red
+            // 
+            this.label_Red.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.label_Red.AutoSize = true;
+            this.label_Red.Location = new System.Drawing.Point(157, 427);
+            this.label_Red.Name = "label_Red";
+            this.label_Red.Size = new System.Drawing.Size(116, 17);
+            this.label_Red.TabIndex = 16;
+            this.label_Red.Text = "Not Found in Box";
+            // 
+            // label_Green
+            // 
+            this.label_Green.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.label_Green.AutoSize = true;
+            this.label_Green.Location = new System.Drawing.Point(38, 427);
+            this.label_Green.Name = "label_Green";
+            this.label_Green.Size = new System.Drawing.Size(86, 17);
+            this.label_Green.TabIndex = 15;
+            this.label_Green.Text = "Exists in Box";
+            // 
+            // button1
+            // 
+            this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.button1.BackColor = System.Drawing.Color.Red;
+            this.button1.Location = new System.Drawing.Point(130, 425);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(21, 19);
+            this.button1.TabIndex = 14;
+            this.button1.UseVisualStyleBackColor = false;
+            // 
+            // button_Green
+            // 
+            this.button_Green.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.button_Green.BackColor = System.Drawing.Color.Green;
+            this.button_Green.Location = new System.Drawing.Point(14, 425);
+            this.button_Green.Margin = new System.Windows.Forms.Padding(0);
+            this.button_Green.Name = "button_Green";
+            this.button_Green.Size = new System.Drawing.Size(21, 19);
+            this.button_Green.TabIndex = 13;
+            this.button_Green.UseVisualStyleBackColor = false;
             // 
             // button_UploadFiles
             // 
@@ -173,9 +201,9 @@
             // button_LocalFolderSelection
             // 
             this.button_LocalFolderSelection.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_LocalFolderSelection.Location = new System.Drawing.Point(801, 19);
+            this.button_LocalFolderSelection.Location = new System.Drawing.Point(543, 12);
             this.button_LocalFolderSelection.Name = "button_LocalFolderSelection";
-            this.button_LocalFolderSelection.Size = new System.Drawing.Size(75, 23);
+            this.button_LocalFolderSelection.Size = new System.Drawing.Size(96, 23);
             this.button_LocalFolderSelection.TabIndex = 8;
             this.button_LocalFolderSelection.Text = "Select";
             this.button_LocalFolderSelection.UseVisualStyleBackColor = true;
@@ -210,7 +238,6 @@
             this.textBox_JobId.ReadOnly = true;
             this.textBox_JobId.Size = new System.Drawing.Size(193, 22);
             this.textBox_JobId.TabIndex = 3;
-            this.textBox_JobId.Text = "Test_123";
             this.textBox_JobId.TextChanged += new System.EventHandler(this.textBox_JobId_TextChanged);
             // 
             // textBox_ClientId
@@ -220,7 +247,6 @@
             this.textBox_ClientId.ReadOnly = true;
             this.textBox_ClientId.Size = new System.Drawing.Size(193, 22);
             this.textBox_ClientId.TabIndex = 2;
-            this.textBox_ClientId.Text = "Phoenix";
             this.textBox_ClientId.TextChanged += new System.EventHandler(this.textBox_ClientId_TextChanged);
             // 
             // labelJobId
@@ -240,6 +266,17 @@
             this.labelClientId.Size = new System.Drawing.Size(62, 17);
             this.labelClientId.TabIndex = 0;
             this.labelClientId.Text = "Client Id:";
+            // 
+            // button_BoxAccountInfo
+            // 
+            this.button_BoxAccountInfo.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_BoxAccountInfo.Location = new System.Drawing.Point(795, 4);
+            this.button_BoxAccountInfo.Name = "button_BoxAccountInfo";
+            this.button_BoxAccountInfo.Size = new System.Drawing.Size(96, 23);
+            this.button_BoxAccountInfo.TabIndex = 7;
+            this.button_BoxAccountInfo.Text = "Box Account ";
+            this.button_BoxAccountInfo.UseVisualStyleBackColor = true;
+            this.button_BoxAccountInfo.Click += new System.EventHandler(this.button_BoxAccountInfo_Click);
             // 
             // tableLayoutPanel1
             // 
@@ -275,57 +312,6 @@
             this.label_AdminToken.Size = new System.Drawing.Size(52, 17);
             this.label_AdminToken.TabIndex = 2;
             this.label_AdminToken.Text = "Token:";
-            // 
-            // button_Green
-            // 
-            this.button_Green.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.button_Green.BackColor = System.Drawing.Color.Green;
-            this.button_Green.Location = new System.Drawing.Point(14, 425);
-            this.button_Green.Margin = new System.Windows.Forms.Padding(0);
-            this.button_Green.Name = "button_Green";
-            this.button_Green.Size = new System.Drawing.Size(21, 19);
-            this.button_Green.TabIndex = 13;
-            this.button_Green.UseVisualStyleBackColor = false;
-            // 
-            // button1
-            // 
-            this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.button1.BackColor = System.Drawing.Color.Red;
-            this.button1.Location = new System.Drawing.Point(130, 425);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(21, 19);
-            this.button1.TabIndex = 14;
-            this.button1.UseVisualStyleBackColor = false;
-            // 
-            // label_Green
-            // 
-            this.label_Green.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.label_Green.AutoSize = true;
-            this.label_Green.Location = new System.Drawing.Point(38, 427);
-            this.label_Green.Name = "label_Green";
-            this.label_Green.Size = new System.Drawing.Size(86, 17);
-            this.label_Green.TabIndex = 15;
-            this.label_Green.Text = "Exists in Box";
-            // 
-            // label_Red
-            // 
-            this.label_Red.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.label_Red.AutoSize = true;
-            this.label_Red.Location = new System.Drawing.Point(157, 427);
-            this.label_Red.Name = "label_Red";
-            this.label_Red.Size = new System.Drawing.Size(116, 17);
-            this.label_Red.TabIndex = 16;
-            this.label_Red.Text = "Not Found in Box";
-            // 
-            // button_GetClientJobInfo
-            // 
-            this.button_GetClientJobInfo.Location = new System.Drawing.Point(543, 12);
-            this.button_GetClientJobInfo.Name = "button_GetClientJobInfo";
-            this.button_GetClientJobInfo.Size = new System.Drawing.Size(93, 23);
-            this.button_GetClientJobInfo.TabIndex = 10;
-            this.button_GetClientJobInfo.Text = "Job Info";
-            this.button_GetClientJobInfo.UseVisualStyleBackColor = true;
-            this.button_GetClientJobInfo.Click += new System.EventHandler(this.button_GetClientJobInfo_Click);
             // 
             // Form_FolderManager
             // 
@@ -372,7 +358,6 @@
         private System.Windows.Forms.Label label_Green;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Button button_Green;
-        private System.Windows.Forms.Button button_GetClientJobInfo;
     }
 }
 

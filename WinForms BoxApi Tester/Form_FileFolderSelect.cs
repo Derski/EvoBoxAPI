@@ -12,6 +12,7 @@ using Extensions;
 using EvoBoxAPILibrary;
 using System.Deployment.Application;
 using System.Text.RegularExpressions;
+using WinForms_BoxApi_Tester;
 
 namespace FileFolderSelector
 {
@@ -33,18 +34,43 @@ namespace FileFolderSelector
                 return _file;
             }
         }
-
+        private string TryGetDeploymentFileName()
+        {
+            string fileName = "";
+            try
+            {
+                fileName = ApplicationDeployment.CurrentDeployment.DataDirectory
+                    + @"\LastSavedLocalFolderStructure.xml";
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Could not read file. Error message: " + ex.Message);
+            }
+            return fileName;
+        }
         public TreeNodeCollection SelectedNodes { get; set; }
-       // public string BasePath { get; set; }
+        // public string BasePath { get; set; }
 
 
-
-        public FileFolderSelectForm()
+        IClientJobInfo _clientJobInfo;
+        public FileFolderSelectForm(IClientJobInfo clientJobInfo)
         {
             InitializeComponent();
             treeFileSelector.PropertyChanged += TreeFileSelector_PropertyChanged;
+            _clientJobInfo = clientJobInfo;
+            SetupFormName(_clientJobInfo);
         }
 
+        private void SetupFormName(IClientJobInfo clientJobInfo)
+        {
+            if(clientJobInfo.CurrentSelectedClient != null)
+            {
+                this.Text = "Folder Structure for: " + clientJobInfo.CurrentSelectedClient 
+                    + ", Job Id: " + clientJobInfo.CurrentSelectedJobId;
+                textBox_ClientId.Text = clientJobInfo.CurrentSelectedClient;
+                textBox_JobId.Text = clientJobInfo.CurrentSelectedJobId;
+            }
+        }
 
 
         private void FileFolderSelectForm_Load(object sender, EventArgs e)
@@ -106,24 +132,11 @@ namespace FileFolderSelector
         #region Save
         private void button_Save_Click(object sender, EventArgs e)
         {
-            treeFileSelector.SaveCurrentSelection(_lastSavedFileName);
+            treeFileSelector.SaveCurrentSelection(_lastSavedFileName,_clientJobInfo.CurrentSelectedClient,_clientJobInfo.CurrentSelectedJobId);
         }
         #endregion
 
-        private string TryGetDeploymentFileName()
-        {
-            string fileName = "";
-            try
-            {
-                fileName = ApplicationDeployment.CurrentDeployment.DataDirectory
-                    + @"\LastSavedLocalFolderStructure.xml";
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Could not read file. Error message: " + ex.Message);
-            }
-            return fileName;
-        }
+
 
         #region Load
         private void button_Load_Click(object sender, EventArgs e)
@@ -132,7 +145,19 @@ namespace FileFolderSelector
         }
         private void LoadTreeFromXML()
         {
-            treeFileSelector.LoadSavedSelection(_lastSavedFileName);
+            //where to store saved files???Maybe Job Work Folder
+
+            string clientJobIdInfo = "";
+            treeFileSelector.LoadSavedSelection(_lastSavedFileName,out clientJobIdInfo);
+            if(!string.IsNullOrEmpty(clientJobIdInfo))
+            {
+                string clientIdFromXML = "";
+                string jobIdFromXML = "";
+                RegexHelper.ExtractClientAndJobIds(clientJobIdInfo,out clientIdFromXML, out jobIdFromXML);
+                _clientJobInfo.CurrentSelectedClient = clientIdFromXML;
+                _clientJobInfo.CurrentSelectedJobId = jobIdFromXML;
+                SetupFormName(_clientJobInfo);
+            }
         }
 
         #endregion Load
@@ -229,6 +254,23 @@ namespace FileFolderSelector
             {
                 errorProvider1.SetError(textBox_SelectedNodeFilter, "Incorrect File Filter Expression\n"+
                     "Please specify the file filter in the form *.txt|*.evoset|*.csv");
+            }
+        }
+
+        private void button_GetClientJobInfo_Click(object sender, EventArgs e)
+        {
+            GetClientJobInfo();
+        }
+        private void GetClientJobInfo()
+        {
+            Form_ClientJobInfo clientInfoForm = new Form_ClientJobInfo(_clientJobInfo);
+            var result = clientInfoForm.ShowDialog();
+            if (result.Equals(DialogResult.OK))
+            {
+                textBox_ClientId.Text = clientInfoForm.ClientId;
+                textBox_JobId.Text = clientInfoForm.JobId;
+                _clientJobInfo.CurrentSelectedClient = clientInfoForm.ClientId;
+                _clientJobInfo.CurrentSelectedJobId = clientInfoForm.JobId;
             }
         }
     }
