@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EvoBoxAPILibrary
+namespace EvoBoxAPILibrary.File_Services
 {
     public class EvoBoxFile
     {

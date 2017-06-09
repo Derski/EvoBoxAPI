@@ -12,6 +12,7 @@ namespace EvoBoxAPILibrary
         public string FileFilter { get; set; }
         public string FullFilePath { get; set; }
         public bool IsDirectory { get;  set; }
+        public bool IncludeInBox { get; set; }
 
         public string CustomTagAsString
         {
@@ -23,7 +24,9 @@ namespace EvoBoxAPILibrary
                     "," +
                     "FullFilePath=" + FullFilePath +
                     "," +
-                    "IsDirectory=" + IsDirectory.ToString();
+                    "IsDirectory=" + IsDirectory.ToString() +
+                    ","+
+                    "IncludeInBox=" + IncludeInBox.ToString();
             }
         }
 
@@ -40,10 +43,16 @@ namespace EvoBoxAPILibrary
             var fullFilePathArray = customTagArray[2].Split('=');//FullFilepath
             FullFilePath = fullFilePathArray[1];
 
-            var isDirectoryArray = customTagArray[3].Split('=');//FileFilter
+            var isDirectoryArray = customTagArray[3].Split('=');//IsDirectory
             bool isDirectoryTryParseResult = true;
             bool.TryParse(isDirectoryArray[1], out isDirectoryTryParseResult);
             IsDirectory = isDirectoryTryParseResult;
+
+            var includeInBoxArray = customTagArray[4].Split('=');//IsDirectory
+            bool includeInBoxTryParseResult = true;
+            bool.TryParse(includeInBoxArray[1], out includeInBoxTryParseResult);
+            IncludeInBox = includeInBoxTryParseResult;
+
         }
         public TreeNodeCustomData()
         {

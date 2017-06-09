@@ -10,8 +10,7 @@ namespace EvoBoxAPILibrary.Tests
     public class BoxFolderStructureManagerTests
     {
         [TestMethod]
-       // [DeploymentItem("LastSavedLocalFolderStructure.xml", "BoxFolderStructureManagerTests")]
-        [DeploymentItem("BoxFolderStructureManagerTests\\LastSavedLocalFolderStructure.xml")]
+        [DeploymentItem("BoxFolderStructureManagerTests\\FolderStructureConfiguration.xml")]
         public void TestCreateLocalEvoBoxFolderStructure_ShouldCreateEvoBoxFolderHierarchy()
         {
             IClientJobInfo clientJobInfo = new ClientJobInfoStub();
@@ -19,7 +18,7 @@ namespace EvoBoxAPILibrary.Tests
             clientJobInfo.CurrentSelectedJobId = "testJobId";
             //arrange
             BoxFolderStructureManager boxFolderStructureManager = new BoxFolderStructureManager(clientJobInfo);
-            string fullPath = Path.GetFullPath(@"LastSavedLocalFolderStructure.xml");
+            string fullPath = Path.GetFullPath(@"FolderStructureConfiguration.xml");
             var folderStructure = boxFolderStructureManager.CreateLocalEvoBoxFolderStructure(fullPath);
             //act
 

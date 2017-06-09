@@ -8,6 +8,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
+using EvoBoxAPILibrary.File_Services;
 
 namespace EvoBoxAPILibrary
 {
@@ -29,11 +30,12 @@ namespace EvoBoxAPILibrary
             {
                 if(node.Checked)
                 {
-                    var firstBoxBode = node.Nodes[0];
-                    var tag = (TreeNodeCustomData)firstBoxBode.Tag;
-                    EvoBoxFolder folder = new EvoBoxFolder(firstBoxBode.FullPath, firstBoxBode.Text, firstBoxBode.Checked,tag.FileFilter);
+                    //skip the top node, for ex. we only want the job work folder, not the desktop folder
+                    var firstBoxNode = node.Nodes[0];
+                    var tag = (TreeNodeCustomData)firstBoxNode.Tag;
+                    EvoBoxFolder folder = new EvoBoxFolder(firstBoxNode.FullPath, firstBoxNode.Text, firstBoxNode.Checked,tag.FileFilter);
                     evoBoxFolders.Add(folder);
-                    AddChildFolders(folder, firstBoxBode.Nodes);
+                    AddChildFolders(folder, firstBoxNode.Nodes);
                 }
             }
 
@@ -87,7 +89,7 @@ namespace EvoBoxAPILibrary
         private const string XmlNodeTagAtt = "tag";
         private const string XmlNodeImageIndexAtt = "imageindex";
 
-        private EvoBoxFolder DeserializeTreeView(string fileName )
+        private EvoBoxFolder DeserializeTreeView(string fileName)
         {
             EvoBoxFolder parentFolder = new EvoBoxFolder("root");
             XmlTextReader reader = null;

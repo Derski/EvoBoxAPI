@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Extensions;
 using EvoBoxAPILibrary;
+using EvoBoxAPILibrary.File_Services;
 using System.Deployment.Application;
 using System.Text.RegularExpressions;
 using WinForms_BoxApi_Tester;
@@ -20,34 +21,6 @@ namespace FileFolderSelector
     {
         private DirectoryInfo directoryInfo;
         
-        private string _lastSavedFileName
-        {
-            get
-            {
-                var _file = Path.Combine
-                    (Environment.CurrentDirectory, "LastSavedLocalFolderStructure.xml");
-                if (ApplicationDeployment.IsNetworkDeployed)
-                {
-                    _file = TryGetDeploymentFileName(); 
-
-                }
-                return _file;
-            }
-        }
-        private string TryGetDeploymentFileName()
-        {
-            string fileName = "";
-            try
-            {
-                fileName = ApplicationDeployment.CurrentDeployment.DataDirectory
-                    + @"\LastSavedLocalFolderStructure.xml";
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Could not read file. Error message: " + ex.Message);
-            }
-            return fileName;
-        }
         public TreeNodeCollection SelectedNodes { get; set; }
         // public string BasePath { get; set; }
 
@@ -132,6 +105,7 @@ namespace FileFolderSelector
         #region Save
         private void button_Save_Click(object sender, EventArgs e)
         {
+            var _lastSavedFileName = XMLFolderConfigurationFileProvider.xmlFolderStructureFileName;
             treeFileSelector.SaveCurrentSelection(_lastSavedFileName,_clientJobInfo.CurrentSelectedClient,_clientJobInfo.CurrentSelectedJobId);
         }
         #endregion
@@ -145,7 +119,7 @@ namespace FileFolderSelector
         }
         private void LoadTreeFromXML()
         {
-            //where to store saved files???Maybe Job Work Folder
+            var _lastSavedFileName = XMLFolderConfigurationFileProvider.xmlFolderStructureFileName;
 
             string clientJobIdInfo = "";
             treeFileSelector.LoadSavedSelection(_lastSavedFileName,out clientJobIdInfo);

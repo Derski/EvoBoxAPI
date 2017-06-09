@@ -4,17 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using EvoBoxAPILibrary.File_Services;
 
 namespace EvoBoxAPILibrary
 {
     public interface IBoxFolderStructureManager
     {
-        //string GetBoxClientJobIdPrefix { get; }
-
-        //string GetBoxClientJobIdRootFolderName { get; }
-
-        //void UpdateClient(string clientId);
-        //void UpdateJobId(string jobId);
 
         EvoBoxFolder CreateLocalEvoBoxFolderStructure(TreeNodeCollection nodes, string clientId, string jobId);
 

@@ -176,13 +176,14 @@ namespace FileFolderSelector
             }
         }
 
-        private TreeNodeCustomData CreateDirectoryTag(TreeNode node)
+        private TreeNodeCustomData CreateDirectoryTag(TreeNode node, bool includeInBox)
         {
             TreeNodeCustomData tag = new TreeNodeCustomData();
             tag.IsDirectory = true;
             tag.BasePath = node.TopAncestor().FullPath;
             tag.FileFilter = "*.*";//default file filter
             tag.FullFilePath = node.FullPath;
+            tag.IncludeInBox = includeInBox;
             return tag;
         }
 
@@ -193,10 +194,10 @@ namespace FileFolderSelector
             {
                 //BasePath = bp.FullName;
                 var rootFolderStructure = topNodes.Add(bp.FullName);
-                rootFolderStructure.Tag = CreateDirectoryTag(rootFolderStructure);
+                rootFolderStructure.Tag = CreateDirectoryTag(rootFolderStructure,false);
 
                 var firstDataNode = rootFolderStructure.Nodes.Add(directoryInfo.Name);
-                firstDataNode.Tag = CreateDirectoryTag(firstDataNode);
+                firstDataNode.Tag = CreateDirectoryTag(firstDataNode,true);
 
                 BuildTree(directoryInfo, firstDataNode);
             }        
@@ -206,7 +207,7 @@ namespace FileFolderSelector
             foreach (DirectoryInfo subdir in directoryInfo.GetDirectories())
             {
                 var childNode = currentNode.Nodes.Add(subdir.Name);
-                childNode.Tag = CreateDirectoryTag(childNode);
+                childNode.Tag = CreateDirectoryTag(childNode,true);
 
                 BuildTree(subdir, childNode);
             }

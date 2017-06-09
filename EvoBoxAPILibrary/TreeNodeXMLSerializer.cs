@@ -38,6 +38,8 @@ namespace EvoBoxAPILibrary
 
         }
 
+
+
         // Xml tag for node, e.g. 'node' in case of <node></node>
         private const string XmlNodeTag = "node";
         private const string XmlJobFoldersTag = "jobfolders";
@@ -216,6 +218,191 @@ namespace EvoBoxAPILibrary
                     node.Expand();
                 }
             }
+        }
+
+
+
+        public EvoBoxFolder TransformXMLtoBoxFolderStructure(string folderConfigFile)
+        {
+            if (File.Exists(folderConfigFile))
+            {
+                EvoBoxFolder folder =  DeserializeXMLToBoxFolder(folderConfigFile);
+                while(folder.Parent != null)
+                {
+                    folder = folder.Parent;
+                }
+                return folder;
+            }
+            return null;
+        }
+
+        //private EvoBoxFolder DeserializeXMLToBoxFolder(string folderConfigFile)
+        //{
+        //    string clientjobIdInfo = "";
+        //    EvoBoxFolder parentFolder = null;
+        //    XmlTextReader reader = null;
+        //    try
+        //    {
+        //        reader = new XmlTextReader(folderConfigFile);
+        //        while (reader.Read())
+        //        {
+        //            if (reader.NodeType == XmlNodeType.Element)
+        //            {
+        //                if (reader.Name == XmlNodeTag)
+        //                {
+        //                    System.Windows.Forms.TreeNode newNode = new System.Windows.Forms.TreeNode();
+        //                    EvoBoxFolder newFolder = null;
+        //                    bool isEmptyElement = reader.IsEmptyElement;
+
+        //                    // loading node attributes
+        //                    int attributeCount = reader.AttributeCount;
+        //                    if (attributeCount > 0)
+        //                    {
+        //                        Dictionary<string, string> attributesDict = new Dictionary<string, string>();
+        //                        for (int i = 0; i < attributeCount; i++)
+        //                        {
+        //                            reader.MoveToAttribute(i);
+        //                            attributesDict.Add(reader.Name, reader.Value);
+        //                        }
+
+        //                        if (attributesDict.ContainsKey(XmlNodeCheckedAtt) && attributesDict[XmlNodeCheckedAtt] == "True")
+        //                        {
+        //                            var tagInfo = new TreeNodeCustomData(attributesDict[XmlNodeTagAtt]);
+        //                            if(tagInfo.IncludeInBox)
+        //                            {
+        //                                newFolder = new EvoBoxFolder(attributesDict[XmlNodeTextAtt]);
+        //                                newFolder.FileFilter = tagInfo.FileFilter;
+        //                                newFolder.FullPath = tagInfo.FullFilePath;
+        //                            }
+        //                        }
+        //                    }                        
+        //                    if (parentFolder != null)
+        //                    {
+        //                        if (newFolder != null)
+        //                        {
+        //                            parentFolder.ChildFolders.Add(newFolder);
+        //                            newFolder.Parent = parentFolder;
+        //                        }
+        //                    }
+        //                    // depth first search
+        //                    if (!isEmptyElement && newFolder != null)
+        //                    {
+        //                        parentFolder = newFolder;
+        //                    }
+        //                }
+        //                else if (reader.Name == XmlJobFoldersTag)
+        //                {
+
+        //                    int attributeCount = reader.AttributeCount;
+        //                    if (attributeCount == 1 )
+        //                    {
+        //                        reader.MoveToAttribute(0);
+        //                        var attrName = reader.Name;
+        //                        var attrValue = reader.Value;
+        //                        clientjobIdInfo = attrValue;
+        //                        string clientId = "";
+        //                        string jobId = "";
+        //                        RegexHelper.ExtractClientAndJobIds(clientjobIdInfo, out clientId, out jobId);
+        //                        if(!string.IsNullOrEmpty(clientId) && !string.IsNullOrEmpty(jobId))
+        //                        {
+        //                            parentFolder = new EvoBoxFolder(clientId);
+        //                            EvoBoxFolder jobIdFolder = new EvoBoxFolder(jobId);
+        //                            parentFolder.ChildFolders.Add(jobIdFolder);
+        //                            jobIdFolder.Parent = parentFolder;
+        //                            parentFolder = jobIdFolder;
+        //                        }
+        //                    }
+        //                }
+        //            }
+        //            // moving up to in TreeView if end tag is encountered
+        //            else if (reader.NodeType == XmlNodeType.EndElement)
+        //            {
+        //                if (reader.Name == XmlNodeTag)
+        //                {
+        //                    parentFolder = parentFolder.Parent;
+        //                }
+        //            }
+        //            else if (reader.NodeType == XmlNodeType.XmlDeclaration)
+        //            {
+        //                //Ignore Xml Declaration                    
+        //            }
+        //            else if (reader.NodeType == XmlNodeType.None)
+        //            {
+        //                return parentFolder;
+        //            }
+        //            else if (reader.NodeType == XmlNodeType.Text)
+        //            {
+
+        //            }
+        //        }
+        //    }
+        //    finally
+        //    {
+        //        reader.Close();
+        //    }
+        //    return parentFolder;
+        //}
+
+
+        private EvoBoxFolder DeserializeXMLToBoxFolder(string folderConfigFile)
+        {
+
+            EvoBoxFolder parentFolder = new EvoBoxFolder("TempRoot");
+            XmlTextReader reader = null;
+            try
+            {
+                reader = new XmlTextReader(folderConfigFile);
+                while (reader.Read())
+                {
+                    if (reader.NodeType == XmlNodeType.Element)
+                    {
+                        if (reader.Name == XmlNodeTag)
+                        {
+                            bool isEmptyElement = reader.IsEmptyElement;
+                            reader.MoveToAttribute(XmlNodeTextAtt);
+                            EvoBoxFolder newFolder = new EvoBoxFolder(reader.Value);
+                            reader.MoveToAttribute(XmlNodeTagAtt);
+                            var tagInfo = new TreeNodeCustomData(reader.Value);
+                            newFolder.CustomNodeTagData = tagInfo;                          
+
+                            parentFolder.ChildFolders.Add(newFolder);
+                            newFolder.Parent = parentFolder;
+                                
+                            
+                            // depth first search
+                            if (!isEmptyElement)
+                            {
+                                parentFolder = newFolder;
+                            }
+                        }
+                    }
+                    // moving up to in TreeView if end tag is encountered
+                    else if (reader.NodeType == XmlNodeType.EndElement)
+                    {
+                        if (reader.Name == XmlNodeTag)
+                        {
+                            parentFolder = parentFolder.Parent;
+                        }
+                    }
+                    else if (reader.NodeType == XmlNodeType.XmlDeclaration)
+                    {
+                        //Ignore Xml Declaration                    
+                    }
+                    else if (reader.NodeType == XmlNodeType.None)
+                    {
+                        return parentFolder;
+                    }
+                    else if (reader.NodeType == XmlNodeType.Text)
+                    {
+
+                    }
+                }
+            }
+            finally
+            {
+                reader.Close();
+            }
+            return parentFolder;
         }
 
         #endregion Load Selection From File

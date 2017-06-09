@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
+using EvoBoxAPILibrary.File_Services;
+
 namespace EvoBoxAPILibrary
 {
     public class EvoBoxFolder
@@ -56,6 +58,8 @@ namespace EvoBoxAPILibrary
                 _fileNames = value;
             }
         }
+
+        public TreeNodeCustomData CustomNodeTagData { get; internal set; }
 
         #region Constructors
         public EvoBoxFolder(string boxId, string boxFolderName, string boxParentId)
