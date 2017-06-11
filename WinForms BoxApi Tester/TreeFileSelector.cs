@@ -1,16 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using System.IO;
-using System.Xml;
+﻿using EvoBoxAPILibrary;
 using Extensions;
-using EvoBoxAPILibrary;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Windows.Forms;
 
 //https://www.codeproject.com/Articles/13099/Loading-and-Saving-a-TreeView-control-to-an-XML-fi
 
@@ -131,6 +125,12 @@ namespace FileFolderSelector
                 currentNode.Checked = false;
                 return;
             }
+
+            if(tag is TreeNodeCustomData)
+            {
+                TreeNodeCustomData customTag = (TreeNodeCustomData)tag;
+                customTag.IsChecked = currentNode.Checked;
+            }
             //check all parents 
             if(currentNode.Checked)
             {
@@ -184,6 +184,7 @@ namespace FileFolderSelector
             tag.FileFilter = "*.*";//default file filter
             tag.FullFilePath = node.FullPath;
             tag.IncludeInBox = includeInBox;
+            tag.IsChecked = node.Checked;
             return tag;
         }
 

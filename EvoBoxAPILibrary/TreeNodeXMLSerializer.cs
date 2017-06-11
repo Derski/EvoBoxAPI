@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.IO;
 using System.Windows.Forms;
 using System.Xml;
 
@@ -39,7 +34,6 @@ namespace EvoBoxAPILibrary
         }
 
 
-
         // Xml tag for node, e.g. 'node' in case of <node></node>
         private const string XmlNodeTag = "node";
         private const string XmlJobFoldersTag = "jobfolders";
@@ -73,6 +67,7 @@ namespace EvoBoxAPILibrary
                 if (node.Tag != null)
                 {
                     TreeNodeCustomData customTagNode = (TreeNodeCustomData)node.Tag;
+                    customTagNode.IsChecked = node.Checked;
                     textWriter.WriteAttributeString(XmlNodeTagAtt, customTagNode.CustomTagAsString);
                 }
                 // add other node properties to serialize here  
@@ -93,7 +88,16 @@ namespace EvoBoxAPILibrary
             if (File.Exists(fileName))
             {
                 treeView.Nodes.Clear();
-                DeserializeTreeView(treeView, fileName,out clientjobIdInfo);
+                try
+                {
+                    DeserializeTreeView(treeView, fileName, out clientjobIdInfo);
+                }
+                catch (System.Exception)
+                {
+
+                    //default to loading up a new file
+                }
+                
             }
         }
         private void DeserializeTreeView(TreeView treeView, string fileName, out string clientjobIdInfo)
@@ -222,135 +226,55 @@ namespace EvoBoxAPILibrary
 
 
 
-        public EvoBoxFolder TransformXMLtoBoxFolderStructure(string folderConfigFile)
+        public EvoBoxFolder TransformXMLtoBoxFolderStructure(string folderConfigFile, IClientJobInfo clientInfo)
         {
             if (File.Exists(folderConfigFile))
             {
-                EvoBoxFolder folder =  DeserializeXMLToBoxFolder(folderConfigFile);
+                string clientId, jobId;
+                EvoBoxFolder folder =  DeserializeXMLToBoxFolder(folderConfigFile,out clientId, out jobId);
+                clientInfo.CurrentSelectedClient = clientId;
+                clientInfo.CurrentSelectedJobId = jobId;
                 while(folder.Parent != null)
                 {
                     folder = folder.Parent;
                 }
-                return folder;
+
+                return TransformLocalBoxFolderStructureToCloudBoxFolderStructure(folder, clientInfo);
             }
             return null;
         }
+        private EvoBoxFolder TransformLocalBoxFolderStructureToCloudBoxFolderStructure
+            (EvoBoxFolder localFolderStructure, IClientJobInfo clientInfo)
+        {
+            EvoBoxFolder rootClientFolder = new EvoBoxFolder(clientInfo.CurrentSelectedClient);
+            EvoBoxFolder jobIdFolder = new EvoBoxFolder(clientInfo.CurrentSelectedJobId);
+            rootClientFolder.ChildFolders.Add(jobIdFolder);
+            jobIdFolder.Parent = rootClientFolder;
 
-        //private EvoBoxFolder DeserializeXMLToBoxFolder(string folderConfigFile)
-        //{
-        //    string clientjobIdInfo = "";
-        //    EvoBoxFolder parentFolder = null;
-        //    XmlTextReader reader = null;
-        //    try
-        //    {
-        //        reader = new XmlTextReader(folderConfigFile);
-        //        while (reader.Read())
-        //        {
-        //            if (reader.NodeType == XmlNodeType.Element)
-        //            {
-        //                if (reader.Name == XmlNodeTag)
-        //                {
-        //                    System.Windows.Forms.TreeNode newNode = new System.Windows.Forms.TreeNode();
-        //                    EvoBoxFolder newFolder = null;
-        //                    bool isEmptyElement = reader.IsEmptyElement;
+            //the root folder of the local box folder structure should be tempRoot, 
+            //each top directory folder should be ignored and it's children pointed at the jobIdFolder
+            foreach(EvoBoxFolder topDirectoryFolder in localFolderStructure.ChildFolders)
+            {
+                foreach(EvoBoxFolder actualBoxFolders in topDirectoryFolder.ChildFolders)
+                {
+                    jobIdFolder.ChildFolders.Add(actualBoxFolders);
+                    actualBoxFolders.Parent = jobIdFolder;
+                }
+            }
 
-        //                    // loading node attributes
-        //                    int attributeCount = reader.AttributeCount;
-        //                    if (attributeCount > 0)
-        //                    {
-        //                        Dictionary<string, string> attributesDict = new Dictionary<string, string>();
-        //                        for (int i = 0; i < attributeCount; i++)
-        //                        {
-        //                            reader.MoveToAttribute(i);
-        //                            attributesDict.Add(reader.Name, reader.Value);
-        //                        }
+            return rootClientFolder;
 
-        //                        if (attributesDict.ContainsKey(XmlNodeCheckedAtt) && attributesDict[XmlNodeCheckedAtt] == "True")
-        //                        {
-        //                            var tagInfo = new TreeNodeCustomData(attributesDict[XmlNodeTagAtt]);
-        //                            if(tagInfo.IncludeInBox)
-        //                            {
-        //                                newFolder = new EvoBoxFolder(attributesDict[XmlNodeTextAtt]);
-        //                                newFolder.FileFilter = tagInfo.FileFilter;
-        //                                newFolder.FullPath = tagInfo.FullFilePath;
-        //                            }
-        //                        }
-        //                    }                        
-        //                    if (parentFolder != null)
-        //                    {
-        //                        if (newFolder != null)
-        //                        {
-        //                            parentFolder.ChildFolders.Add(newFolder);
-        //                            newFolder.Parent = parentFolder;
-        //                        }
-        //                    }
-        //                    // depth first search
-        //                    if (!isEmptyElement && newFolder != null)
-        //                    {
-        //                        parentFolder = newFolder;
-        //                    }
-        //                }
-        //                else if (reader.Name == XmlJobFoldersTag)
-        //                {
+        }
 
-        //                    int attributeCount = reader.AttributeCount;
-        //                    if (attributeCount == 1 )
-        //                    {
-        //                        reader.MoveToAttribute(0);
-        //                        var attrName = reader.Name;
-        //                        var attrValue = reader.Value;
-        //                        clientjobIdInfo = attrValue;
-        //                        string clientId = "";
-        //                        string jobId = "";
-        //                        RegexHelper.ExtractClientAndJobIds(clientjobIdInfo, out clientId, out jobId);
-        //                        if(!string.IsNullOrEmpty(clientId) && !string.IsNullOrEmpty(jobId))
-        //                        {
-        //                            parentFolder = new EvoBoxFolder(clientId);
-        //                            EvoBoxFolder jobIdFolder = new EvoBoxFolder(jobId);
-        //                            parentFolder.ChildFolders.Add(jobIdFolder);
-        //                            jobIdFolder.Parent = parentFolder;
-        //                            parentFolder = jobIdFolder;
-        //                        }
-        //                    }
-        //                }
-        //            }
-        //            // moving up to in TreeView if end tag is encountered
-        //            else if (reader.NodeType == XmlNodeType.EndElement)
-        //            {
-        //                if (reader.Name == XmlNodeTag)
-        //                {
-        //                    parentFolder = parentFolder.Parent;
-        //                }
-        //            }
-        //            else if (reader.NodeType == XmlNodeType.XmlDeclaration)
-        //            {
-        //                //Ignore Xml Declaration                    
-        //            }
-        //            else if (reader.NodeType == XmlNodeType.None)
-        //            {
-        //                return parentFolder;
-        //            }
-        //            else if (reader.NodeType == XmlNodeType.Text)
-        //            {
-
-        //            }
-        //        }
-        //    }
-        //    finally
-        //    {
-        //        reader.Close();
-        //    }
-        //    return parentFolder;
-        //}
-
-
-        private EvoBoxFolder DeserializeXMLToBoxFolder(string folderConfigFile)
+        private EvoBoxFolder DeserializeXMLToBoxFolder(string folderConfigFile, out string clientId, out string jobId)
         {
 
             EvoBoxFolder parentFolder = new EvoBoxFolder("TempRoot");
             XmlTextReader reader = null;
             try
             {
+                clientId = "";
+                jobId = "";
                 reader = new XmlTextReader(folderConfigFile);
                 while (reader.Read())
                 {
@@ -360,21 +284,40 @@ namespace EvoBoxAPILibrary
                         {
                             bool isEmptyElement = reader.IsEmptyElement;
                             reader.MoveToAttribute(XmlNodeTextAtt);
-                            EvoBoxFolder newFolder = new EvoBoxFolder(reader.Value);
+                            var folderName = reader.Value;
+                            reader.MoveToAttribute(XmlNodeCheckedAtt);
+                            bool isChecked = true;
+                            bool.TryParse(reader.Value, out isChecked);
+
                             reader.MoveToAttribute(XmlNodeTagAtt);
                             var tagInfo = new TreeNodeCustomData(reader.Value);
-                            newFolder.CustomNodeTagData = tagInfo;                          
 
-                            parentFolder.ChildFolders.Add(newFolder);
-                            newFolder.Parent = parentFolder;
-                                
-                            
-                            // depth first search
-                            if (!isEmptyElement)
+                            if(isChecked)
                             {
-                                parentFolder = newFolder;
+                                EvoBoxFolder newFolder = new EvoBoxFolder(folderName);
+                                newFolder.CustomNodeTagData = tagInfo;
+                                parentFolder.ChildFolders.Add(newFolder);
+                                newFolder.Parent = parentFolder;
+                                // depth first search
+                                if (!isEmptyElement)
+                                {
+                                    parentFolder = newFolder;
+                                }
                             }
                         }
+
+                        else if (reader.Name == XmlJobFoldersTag)
+                        {
+                            int attributeCount = reader.AttributeCount;
+                            if (attributeCount == 1)
+                            {
+                                reader.MoveToAttribute(0);
+                                var clientjobIdInfo = reader.Value;
+                                
+                                RegexHelper.ExtractClientAndJobIds(clientjobIdInfo, out clientId, out jobId); 
+                            }
+                        }
+
                     }
                     // moving up to in TreeView if end tag is encountered
                     else if (reader.NodeType == XmlNodeType.EndElement)

@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using EvoBoxAPILibrary.File_Services;
+﻿
 using EvoBoxAPILibrary;
+using EvoBoxAPILibrary.File_Services;
 
 namespace BoxApiConsole
 {
@@ -20,7 +15,8 @@ namespace BoxApiConsole
         {
             string folderConfigFile = XMLFolderConfigurationFileProvider.FolderStructureFileFullPath;
             TreeNodeXMLSerializer treeNodeXMLSerializer = new TreeNodeXMLSerializer();
-            EvoBoxFolder folder =  treeNodeXMLSerializer.TransformXMLtoBoxFolderStructure(folderConfigFile);
+            IClientJobInfo clientInfo = new ClientJobInfoStub();
+            EvoBoxFolder folder =  treeNodeXMLSerializer.TransformXMLtoBoxFolderStructure(folderConfigFile,clientInfo);
 
         }
 
