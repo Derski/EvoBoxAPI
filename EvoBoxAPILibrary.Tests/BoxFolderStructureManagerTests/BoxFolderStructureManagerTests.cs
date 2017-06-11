@@ -1,8 +1,5 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using EvoBoxAPILibrary;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.IO;
-using System.Reflection;
 
 namespace EvoBoxAPILibrary.Tests
 {
@@ -17,11 +14,10 @@ namespace EvoBoxAPILibrary.Tests
             clientJobInfo.CurrentSelectedClient = "testClient";
             clientJobInfo.CurrentSelectedJobId = "testJobId";
             //arrange
-            BoxFolderStructureManager boxFolderStructureManager = new BoxFolderStructureManager(clientJobInfo);
+            BoxFolderStructureManager folderStructureManager = new BoxFolderStructureManager(clientJobInfo);
             string fullPath = Path.GetFullPath(@"FolderStructureConfiguration.xml");
-            var folderStructure = boxFolderStructureManager.CreateLocalEvoBoxFolderStructure(fullPath);
             //act
-
+            folderStructureManager.TransformXMLtoBoxFolderStructure(fullPath, clientJobInfo);
             //assert
 
         }

@@ -1,26 +1,53 @@
-﻿using System;
+﻿using EvoBoxAPILibrary.File_Services;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-using EvoBoxAPILibrary.File_Services;
 
 namespace EvoBoxAPILibrary
 {
     public class EvoBoxFolder
     {
         public bool Checked { get; set; }
+
         public string BoxId { get; set; }
         public string FolderName { get; set; }
 
-        public string FileFilter { get; set; }
+        private string _fileFilter;
+        public string FileFilter {
+            get
+            {
+                if(_fileFilter == null && CustomNodeTagData != null)
+                {
+                    _fileFilter = CustomNodeTagData.FileFilter;
+                }
+                return _fileFilter;
+            }
+            set
+            {
+                _fileFilter = value;
+            }
+        }
 
         //ClientJobPrefix_FolderName
         public string BoxFolderName { get; set; }
 
         //local file path
-        public string FullPath { get; set; }
+        private string _fullPath;
+        public string FullPath
+        {
+            get
+            {
+                if(_fullPath==null && CustomNodeTagData != null)
+                {
+                    _fullPath = CustomNodeTagData.FullFilePath;
+                }
+                return _fullPath;
+            }
+            set
+            {
+                _fullPath = value;
+            }
+        }
 
+        public bool FolderExistsLocally { get; set; }
         public string BoxParentId { get; set; }
 
         public EvoBoxFolder Parent { get; set; }
@@ -58,7 +85,6 @@ namespace EvoBoxAPILibrary
                 _fileNames = value;
             }
         }
-
         public TreeNodeCustomData CustomNodeTagData { get; internal set; }
 
         #region Constructors

@@ -226,47 +226,8 @@ namespace EvoBoxAPILibrary
 
 
 
-        public EvoBoxFolder TransformXMLtoBoxFolderStructure(string folderConfigFile, IClientJobInfo clientInfo)
-        {
-            if (File.Exists(folderConfigFile))
-            {
-                string clientId, jobId;
-                EvoBoxFolder folder =  DeserializeXMLToBoxFolder(folderConfigFile,out clientId, out jobId);
-                clientInfo.CurrentSelectedClient = clientId;
-                clientInfo.CurrentSelectedJobId = jobId;
-                while(folder.Parent != null)
-                {
-                    folder = folder.Parent;
-                }
 
-                return TransformLocalBoxFolderStructureToCloudBoxFolderStructure(folder, clientInfo);
-            }
-            return null;
-        }
-        private EvoBoxFolder TransformLocalBoxFolderStructureToCloudBoxFolderStructure
-            (EvoBoxFolder localFolderStructure, IClientJobInfo clientInfo)
-        {
-            EvoBoxFolder rootClientFolder = new EvoBoxFolder(clientInfo.CurrentSelectedClient);
-            EvoBoxFolder jobIdFolder = new EvoBoxFolder(clientInfo.CurrentSelectedJobId);
-            rootClientFolder.ChildFolders.Add(jobIdFolder);
-            jobIdFolder.Parent = rootClientFolder;
-
-            //the root folder of the local box folder structure should be tempRoot, 
-            //each top directory folder should be ignored and it's children pointed at the jobIdFolder
-            foreach(EvoBoxFolder topDirectoryFolder in localFolderStructure.ChildFolders)
-            {
-                foreach(EvoBoxFolder actualBoxFolders in topDirectoryFolder.ChildFolders)
-                {
-                    jobIdFolder.ChildFolders.Add(actualBoxFolders);
-                    actualBoxFolders.Parent = jobIdFolder;
-                }
-            }
-
-            return rootClientFolder;
-
-        }
-
-        private EvoBoxFolder DeserializeXMLToBoxFolder(string folderConfigFile, out string clientId, out string jobId)
+        public  EvoBoxFolder DeserializeXMLToBoxFolder(string folderConfigFile, out string clientId, out string jobId)
         {
 
             EvoBoxFolder parentFolder = new EvoBoxFolder("TempRoot");

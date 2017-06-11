@@ -1,27 +1,24 @@
-﻿using Box.V2;
-using Box.V2.Models;
+﻿using EvoBoxAPILibrary.File_Services;
 using Extensions;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Xml;
-using EvoBoxAPILibrary.File_Services;
 
 namespace EvoBoxAPILibrary
 {
     public class BoxFolderStructureManager: IBoxFolderStructureManager
     {
         IClientJobInfo _clientJobInfo;
+        TreeNodeXMLSerializer xmlSerializer;
         public BoxFolderStructureManager(IClientJobInfo clientJobInfo)
         {
             _clientJobInfo = clientJobInfo;
+            xmlSerializer = new TreeNodeXMLSerializer();
         }
         
-        #region Create box folder structure from client, job and local folders  
-        public EvoBoxFolder CreateLocalEvoBoxFolderStructure
+        #region Create box folder structure from client, job and local folders from the tree nodes  
+        public EvoBoxFolder CreateLocalEvoBoxFolderStructureFromTreeNodes
             (TreeNodeCollection nodes,string clientId, string jobId)
         {
             List<EvoBoxFolder> evoBoxFolders = new List<EvoBoxFolder>();
@@ -73,101 +70,7 @@ namespace EvoBoxAPILibrary
             
         }
 
-
-        public EvoBoxFolder CreateLocalEvoBoxFolderStructure(string folderStructureFilePath)
-        {
-            return DeserializeTreeView(folderStructureFilePath);
-        }
-        
-        // Xml tag for node, e.g. 'node' in case of <node></node>
-        private const string XmlNodeTag = "node";
-        // Xml attributes for node e.g. <node text="Asia" tag="" 
-        // imageindex="1"></node>
-        private const string XmlNodeTextAtt = "text";
-        private const string XmlNodeCheckedAtt = "checked";
-        private const string XmlNodeExpandedAtt = "expanded";
-        private const string XmlNodeTagAtt = "tag";
-        private const string XmlNodeImageIndexAtt = "imageindex";
-
-        private EvoBoxFolder DeserializeTreeView(string fileName)
-        {
-            EvoBoxFolder parentFolder = new EvoBoxFolder("root");
-            XmlTextReader reader = null;
-            try
-            {
-                reader = new XmlTextReader(fileName);
-                while (reader.Read())
-                {
-                    if (reader.NodeType == XmlNodeType.Element)
-                    {
-                        if (reader.Name == XmlNodeTag)
-                        {
-                            System.Windows.Forms.TreeNode newNode = new System.Windows.Forms.TreeNode();
-                            EvoBoxFolder newFolder = null;
-                            bool isEmptyElement = reader.IsEmptyElement;
-
-                            // loading node attributes
-                            int attributeCount = reader.AttributeCount;
-                            if (attributeCount > 0)
-                            {
-                                Dictionary<string, string> attributesDict = new Dictionary<string, string>();
-                                
-                                if(attributesDict.ContainsKey(XmlNodeCheckedAtt) && attributesDict[XmlNodeCheckedAtt]== "True")
-                                {
-                                    newFolder = new EvoBoxFolder(attributesDict[XmlNodeTextAtt]);
-                                    if(attributesDict.ContainsKey(XmlNodeTagAtt))
-                                    {
-                                        var tagInfo = new TreeNodeCustomData(attributesDict[XmlNodeTagAtt]);
-                                        newFolder.FileFilter = tagInfo.FileFilter;
-                                        newFolder.FullPath = tagInfo.FullFilePath;
-                                    }
-                                }
-                            }
-                            //same as above for the EvoBoxFolder
-                            if(parentFolder != null )
-                            {
-                                if(newFolder != null)
-                                {
-                                    parentFolder.ChildFolders.Add(newFolder);
-                                    newFolder.Parent = parentFolder;
-                                }
-                            }
-                            // depth first search
-                            if (!isEmptyElement)
-                            {
-                                parentFolder = newFolder;
-                            }
-                        }
-                    }
-                    // moving up to in TreeView if end tag is encountered
-                    else if (reader.NodeType == XmlNodeType.EndElement)
-                    {
-                        if (reader.Name == XmlNodeTag)
-                        {
-                            parentFolder = parentFolder.Parent;
-                        }
-                    }
-                    else if (reader.NodeType == XmlNodeType.XmlDeclaration)
-                    {
-                        //Ignore Xml Declaration                    
-                    }
-                    else if (reader.NodeType == XmlNodeType.None)
-                    {
-                        return parentFolder;
-                    }
-                    else if (reader.NodeType == XmlNodeType.Text)
-                    {
-                        //not yet sure where to store client and job id data...
-                    }
-                }
-            }
-            finally
-            {
-                reader.Close();
-            }
-            return parentFolder;
-        }
-
+          
         #endregion
 
         #region Validate with Box which local folders or files already exist in the cloud and populate the box IDs and SHA1 hash values
@@ -193,7 +96,7 @@ namespace EvoBoxAPILibrary
         #endregion
 
         #region Read in All the Files in the folder
-        private void ReadInFolderFiles(EvoBoxFolder rootFolder)
+        public  void ReadInFolderFiles(EvoBoxFolder rootFolder)
         {
             foreach (var folder in rootFolder.Flatten(x => x.ChildFolders))
             {
@@ -214,6 +117,64 @@ namespace EvoBoxAPILibrary
                     {
                         folder.FileNames.Add(new EvoBoxFile(fileInfo.FullName));
                     }
+                }
+            }
+        }
+        #endregion
+
+        #region Create box folder structure from an xml file
+        public EvoBoxFolder TransformXMLtoBoxFolderStructure(string folderConfigFile, IClientJobInfo clientInfo)
+        {
+            if (File.Exists(folderConfigFile))
+            {
+                string clientId, jobId;
+                EvoBoxFolder folder = xmlSerializer.DeserializeXMLToBoxFolder(folderConfigFile, out clientId, out jobId);
+                clientInfo.CurrentSelectedClient = clientId;
+                clientInfo.CurrentSelectedJobId = jobId;
+                while (folder.Parent != null)
+                {
+                    folder = folder.Parent;
+                }
+
+                return TransformLocalBoxFolderStructureToCloudBoxFolderStructure(folder, clientInfo);
+            }
+            return null;
+        }
+        public EvoBoxFolder TransformLocalBoxFolderStructureToCloudBoxFolderStructure
+            (EvoBoxFolder localFolderStructure, IClientJobInfo clientInfo)
+        {
+            EvoBoxFolder rootClientFolder = new EvoBoxFolder(clientInfo.CurrentSelectedClient);
+            EvoBoxFolder jobIdFolder = new EvoBoxFolder(clientInfo.CurrentSelectedJobId);
+            rootClientFolder.ChildFolders.Add(jobIdFolder);
+            jobIdFolder.Parent = rootClientFolder;
+
+            //the root folder of the local box folder structure should be tempRoot, 
+            //each top directory folder should be ignored and it's children pointed at the jobIdFolder
+            foreach (EvoBoxFolder topDirectoryFolder in localFolderStructure.ChildFolders)
+            {
+                foreach (EvoBoxFolder actualBoxFolders in topDirectoryFolder.ChildFolders)
+                {
+                    jobIdFolder.ChildFolders.Add(actualBoxFolders);
+                    actualBoxFolders.Parent = jobIdFolder;
+                }
+            }
+
+            return rootClientFolder;
+        }
+
+        #endregion
+
+        #region Validate all local folders exist for a box folder structure
+
+        public void VerifyLocalFolderStructureFromBoxFolder(EvoBoxFolder rootClientFolder)
+        {
+            if(rootClientFolder != null && rootClientFolder.ChildFolders != null)
+            {
+                //get the job folder
+                EvoBoxFolder jobIdFolder = rootClientFolder.ChildFolders.FirstOrDefault();
+                foreach(var folder in jobIdFolder.Flatten(f=>f.ChildFolders))
+                {
+                    folder.FolderExistsLocally =  Directory.Exists(folder.FullPath);
                 }
             }
         }

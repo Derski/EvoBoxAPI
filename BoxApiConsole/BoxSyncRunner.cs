@@ -13,10 +13,16 @@ namespace BoxApiConsole
 
         public void RunSync()
         {
+            //compose the whole damn thing starting from xml file
+
             string folderConfigFile = XMLFolderConfigurationFileProvider.FolderStructureFileFullPath;
             TreeNodeXMLSerializer treeNodeXMLSerializer = new TreeNodeXMLSerializer();
             IClientJobInfo clientInfo = new ClientJobInfoStub();
-            EvoBoxFolder folder =  treeNodeXMLSerializer.TransformXMLtoBoxFolderStructure(folderConfigFile,clientInfo);
+            BoxFolderStructureManager folderStructureManager = new BoxFolderStructureManager(clientInfo);
+            EvoBoxFolder rootClientFolder = folderStructureManager.TransformXMLtoBoxFolderStructure(folderConfigFile,clientInfo);
+            folderStructureManager.VerifyLocalFolderStructureFromBoxFolder(rootClientFolder);
+            folderStructureManager.ReadInFolderFiles(rootClientFolder);
+            
 
         }
 

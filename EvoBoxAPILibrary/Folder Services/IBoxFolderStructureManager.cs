@@ -1,18 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using EvoBoxAPILibrary.File_Services;
 using System.Windows.Forms;
-using EvoBoxAPILibrary.File_Services;
 
 namespace EvoBoxAPILibrary
 {
     public interface IBoxFolderStructureManager
     {
 
-        EvoBoxFolder CreateLocalEvoBoxFolderStructure(TreeNodeCollection nodes, string clientId, string jobId);
+        EvoBoxFolder CreateLocalEvoBoxFolderStructureFromTreeNodes(TreeNodeCollection nodes, string clientId, string jobId);
 
         void ReadCloudFolderMetadataLocally(EvoBoxFolder evoBoxFolder, FolderManager folderManager, FileManager fileManager);
+
+        void ReadInFolderFiles(EvoBoxFolder rootFolder);
+
+        EvoBoxFolder TransformXMLtoBoxFolderStructure(string folderConfigFile, IClientJobInfo clientInfo);
+
+        EvoBoxFolder TransformLocalBoxFolderStructureToCloudBoxFolderStructure
+            (EvoBoxFolder localFolderStructure, IClientJobInfo clientInfo);
     }
 }

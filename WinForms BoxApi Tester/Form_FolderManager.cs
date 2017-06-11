@@ -87,7 +87,7 @@ namespace WinForms_BoxApi_Tester
                 textBox_ClientId.Text = clientJobInfo.CurrentSelectedClient;
                 textBox_JobId.Text = clientJobInfo.CurrentSelectedJobId;
 
-                EvoBoxFolder  = _boxFolderStructureManager.CreateLocalEvoBoxFolderStructure
+                EvoBoxFolder  = _boxFolderStructureManager.CreateLocalEvoBoxFolderStructureFromTreeNodes
                     (folderSelector.SelectedNodes, clientJobInfo.CurrentSelectedClient, clientJobInfo.CurrentSelectedJobId);
 
                 richTextBox_BoxNodes.Clear();
