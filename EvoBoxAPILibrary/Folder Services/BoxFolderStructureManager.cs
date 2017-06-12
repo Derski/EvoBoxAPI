@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
+using System;
 
 namespace EvoBoxAPILibrary
 {
@@ -54,6 +55,17 @@ namespace EvoBoxAPILibrary
 
             return ClientRootFolder;
         }
+
+        public void FixUserNameInPath(EvoBoxFolder rootClientFolder,string currentUserName)
+        {
+            foreach(var folder in rootClientFolder.Flatten(f=>f.ChildFolders))
+            {
+                string path = folder.FullPath;
+                RegexHelper.ReplaceUserNameForCurrentUser(ref path, currentUserName);
+                folder.FullPath = path;
+            }
+        }
+
         private static void AddChildFolders(EvoBoxFolder parentFolder, TreeNodeCollection nodes)
         {
             foreach(TreeNode childNode in nodes)

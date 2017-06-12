@@ -21,5 +21,34 @@ namespace EvoBoxAPILibrary
             jobId = m.Groups["Part2"].Value;
             return;
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="currentUserName"></param>
+        /// <returns></returns>
+        public static string ReplaceUserNameForCurrentUser(ref string path, string currentUserName)
+        {
+            var oldUserName = ExtractUserName(path);
+            if(!string.IsNullOrEmpty(oldUserName))
+            {
+                path = path.Replace(oldUserName, currentUserName);
+            }
+            return path;
+        }
+
+        public static string ExtractUserName(string path)
+        {
+            string userName = "";
+            Regex re = new Regex(@"C:\\Users\\(?<UserName>\w+)\\.*");
+            Match m = re.Match(path);
+            if(m.Success)
+            {
+                userName = m.Groups["UserName"].Value;
+            }
+            return userName;
+        }
+
     }
 }

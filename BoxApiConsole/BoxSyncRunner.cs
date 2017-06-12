@@ -1,6 +1,7 @@
 ﻿
 using EvoBoxAPILibrary;
 using EvoBoxAPILibrary.File_Services;
+using EvoBoxAPILibrary.LogFinderService;
 
 namespace BoxApiConsole
 {
@@ -20,6 +21,11 @@ namespace BoxApiConsole
             IClientJobInfo clientInfo = new ClientJobInfoStub();
             BoxFolderStructureManager folderStructureManager = new BoxFolderStructureManager(clientInfo);
             EvoBoxFolder rootClientFolder = folderStructureManager.TransformXMLtoBoxFolderStructure(folderConfigFile,clientInfo);
+
+            ILocalLogLocationFinder logFinder = new LocalLogLocationFinder();
+
+
+            folderStructureManager.FixUserNameInPath(rootClientFolder,logFinder.FindCurrentUserName());
             folderStructureManager.VerifyLocalFolderStructureFromBoxFolder(rootClientFolder);
             folderStructureManager.ReadInFolderFiles(rootClientFolder);
             

@@ -25,5 +25,32 @@ namespace EvoBoxAPILibrary.Tests
             Assert.AreEqual(clientId, "Phoenix");
             Assert.AreEqual(jobId, "Test123");
         }
+
+        [TestMethod]
+        public void ReplaceUserNameForCurrentUser_PassingPathWithOldUserName_ShouldReturnPathWithPassedUsername()
+        {
+            //arrange
+            string pathToBeReplaced = @"C:\Users\derski\Desktop";
+            string userNameToUse = "EvoSiteUser";
+            //act
+            RegexHelper.ReplaceUserNameForCurrentUser(ref pathToBeReplaced, userNameToUse);
+
+            //assert
+            Assert.AreEqual(pathToBeReplaced, @"C:\Users\EvoSiteUser\Desktop");
+        }
+
+        //ExtractUserName
+        [TestMethod]
+        public void ExtractUserName_PassingPathThatIncludesAUsername_ShouldExtractClientandJobId()
+        {
+            //arrange
+            string pathToBeReplaced = @"C:\Users\derski\Desktop";
+            string userNameToUse = "EvoSiteUser";
+            //act
+            RegexHelper.ReplaceUserNameForCurrentUser(ref pathToBeReplaced, userNameToUse);
+
+            //assert
+            Assert.AreEqual(pathToBeReplaced, @"C:\Users\EvoSiteUser\Desktop");
+        }
     }
 }
